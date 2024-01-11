@@ -1,6 +1,7 @@
 import styles from "./styles.module.scss";
 import Header from "./Header/Header";
 import Background from "./Background/Background";
+import Post from "../Post/Post";
 
 const UserProfile = () => {
   return (
@@ -8,7 +9,7 @@ const UserProfile = () => {
       <Background></Background>
       <div className={`${styles.content}`}>
         <Header></Header>
-        <p>1</p>
+        <Post></Post>
       </div>
     </div>
   );
