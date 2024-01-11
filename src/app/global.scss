@@ -3,3 +3,13 @@
   margin: 0px;
   box-sizing: border-box;
 }
+
+body {
+  background-color: #edf1f2;
+
+  a {
+    &:hover {
+      color: #4988ce !important;
+    }
+  }
+}
