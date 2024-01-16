@@ -19,5 +19,6 @@
   z-index: -1;
   border-bottom: solid 3px #e6e6e6;
   background-image: linear-gradient(180deg, var(--myColor1), var(--myColor2));
-  transition: --myColor1 1000ms, --myColor2 1000ms;
+  transition: --myColor1 1000ms, --myColor2 1000ms, opacity 1000ms;
+  //opacity: 0;
 }

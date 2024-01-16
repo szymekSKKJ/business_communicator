@@ -10,6 +10,7 @@ const UserProfile = () => {
       <div className={`${styles.content}`}>
         <Header></Header>
         <Post></Post>
+        <Post></Post>
       </div>
     </div>
   );

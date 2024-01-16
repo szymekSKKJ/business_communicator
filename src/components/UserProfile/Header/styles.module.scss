@@ -64,18 +64,21 @@
       p.username {
         font-weight: 600;
         font-size: 28px;
-        line-height: 1.2;
+      }
+
+      p.id {
+        font-weight: 500;
+        font-size: 14px;
       }
 
       p.proffesion {
-        color: #4988ce;
         font-weight: 600;
-        font-size: 16px;
-        line-height: 1.2;
+        font-size: 17px;
+        margin-top: 5px;
+        margin-bottom: 20px;
       }
 
       button {
-        margin-top: 20px;
         width: 200px;
       }
     }
@@ -95,10 +98,6 @@
         align-items: center;
         justify-content: center;
         margin: 0px auto 0px auto;
-
-        p {
-          line-height: 1;
-        }
 
         .opinionRate {
           width: 100%;
@@ -139,7 +138,7 @@
             &:first-child {
               font-size: 22px;
               font-weight: 700;
-              color: #4988ce;
+              color: font;
             }
 
             &:nth-child(2) {

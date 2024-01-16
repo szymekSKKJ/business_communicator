@@ -23,7 +23,8 @@ const Header = () => {
       <div className={`${styles.wrapper}`}>
         <div className={`${styles.userData}`}>
           <p className={`${styles.username}`}>Disney+</p>
-          <p className={`${styles.proffesion}`}>Firma z branży mediów/wiadomości</p>
+          <p className={`${styles.id}`}>@Disneyplus</p>
+          <p className={`${styles.proffesion}`}>Świętuj historie, które kochasz. 💙</p>
           <Button>Napisz wiadomość</Button>
         </div>
         <div className={`${styles.wrapper}`}>

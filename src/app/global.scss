@@ -4,8 +4,13 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: #edf1f2;
+  background-color: #e9edf1;
+  color: black;
 
   a {
     &:hover {

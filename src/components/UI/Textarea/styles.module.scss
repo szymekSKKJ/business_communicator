@@ -1,0 +1,42 @@
+.textarea {
+  width: 100%;
+  overflow: hidden;
+
+  span {
+    width: 100%;
+    resize: none;
+    border: unset;
+    border-bottom: solid 1px black;
+    transition: 250ms;
+    outline-width: 0px;
+    position: relative;
+    cursor: text;
+    display: block;
+    font-size: 17px;
+    padding-bottom: 4px;
+
+    &:empty::before {
+      content: attr(data-placeholder);
+      color: gray;
+    }
+
+    &::after {
+      content: "";
+      width: 100%;
+      height: 2px;
+      background-color: #4988ce;
+      position: absolute;
+      bottom: -1px;
+      left: 0px;
+      transform: translateX(-100%);
+      transition: 250ms;
+      z-index: 1;
+    }
+
+    &:focus {
+      &::after {
+        transform: translateX(0%);
+      }
+    }
+  }
+}

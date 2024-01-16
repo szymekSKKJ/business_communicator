@@ -52,22 +52,21 @@ const getAverageRGB = async (
 };
 
 const Background = () => {
-  const [height, setHeight] = useState(626);
+  const [height, setHeight] = useState(655); // From dev tools
 
   const backgroundElementRef = useRef<null | HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     (async () => {
-      const avgRgb = await getAverageRGB(testBanner as HTMLImageElement);
-      backgroundElementRef.current!.style.setProperty("--myColor1", `rgba(${avgRgb.r}, ${avgRgb.g}, ${avgRgb.b}, 0.33)`);
-    })();
-  }, []);
+      if (backgroundElementRef.current) {
+        const mainHeaderElement = backgroundElementRef.current.parentElement?.querySelector("#main-header");
+        setHeight(mainHeaderElement!.getBoundingClientRect().height);
 
-  useEffect(() => {
-    if (backgroundElementRef.current) {
-      //const mainHeaderElement = backgroundElementRef.current.parentElement?.querySelector("#main-header");
-      //setHeight(mainHeaderElement!.getBoundingClientRect().height);
-    }
+        const avgRgb = await getAverageRGB(testBanner as HTMLImageElement);
+        backgroundElementRef.current.style.setProperty("--myColor1", `rgba(${avgRgb.r}, ${avgRgb.g}, ${avgRgb.b}, 0.33)`);
+        //backgroundElementRef.current.style.opacity = "1";
+      }
+    })();
   }, []);
 
   return (
@@ -76,7 +75,6 @@ const Background = () => {
       className={`${styles.background}`}
       style={{
         height: `${height}px`,
-        //backgroundImage: `linear-gradient(180deg, rgba(${avgRgb?.r}, ${avgRgb?.g}, ${avgRgb?.b}, 0.5), rgba(255,255,255, 1))`,
       }}></div>
   );
 };

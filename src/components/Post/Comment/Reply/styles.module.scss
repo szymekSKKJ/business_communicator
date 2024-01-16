@@ -1,0 +1,98 @@
+@use "../../../../app/fontColors.scss" as fontColors;
+
+.reply {
+  width: 100%;
+
+  --image-height: 42px;
+
+  .userData {
+    height: calc(var(--image-height) - 8px);
+    margin-bottom: 4px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    .wrapper1 {
+      width: calc(var(--image-height) - 8px);
+      height: calc(var(--image-height) - 8px);
+      border-radius: 100%;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      img {
+        width: 100%;
+        height: auto;
+      }
+    }
+
+    .wrapper2 {
+      height: 100%;
+      margin-left: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+
+      p {
+        &:first-child {
+          font-size: 14px;
+          font-weight: 500;
+        }
+
+        &:nth-child(2) {
+          font-size: 10px;
+          font-weight: 500;
+          color: fontColors.$grey;
+        }
+      }
+    }
+  }
+
+  > .content {
+    p {
+      font-size: 15px;
+      font-weight: 400;
+
+      span {
+        font-weight: 600;
+      }
+    }
+  }
+
+  .options {
+    width: 100%;
+    height: auto;
+    display: flex;
+    border-top: solid 2px #e6e6e6;
+    margin-top: 8px;
+    margin-bottom: 8px;
+
+    button {
+      width: 100%;
+      cursor: pointer;
+      background-color: transparent;
+      border: unset;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      color: fontColors.$grey;
+      margin-top: 4px;
+      transition: 250ms;
+      border-radius: 3px;
+      gap: 8px;
+      font-size: 12px;
+      padding: 8px 0px 8px 0px;
+
+      &:hover {
+        background-color: #e6e6e6;
+      }
+
+      img {
+        width: 20px;
+      }
+    }
+  }
+}
