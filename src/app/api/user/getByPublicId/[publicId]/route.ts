@@ -1,6 +1,6 @@
 import prisma from "@/prisma";
 
-export const GET = async ({ params: { publicId } }: { params: { publicId: string } }) => {
+export const GET = async (Request: Request | null, { params: { publicId } }: { params: { publicId: string } }) => {
   try {
     const user = await prisma.user.findUnique({
       where: {

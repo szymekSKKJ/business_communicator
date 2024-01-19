@@ -7,7 +7,7 @@ interface componentsProps {
 }
 
 const UserProfilePage = async ({ params: { publicId } }: componentsProps) => {
-  const foundUserData = (await GET({ params: { publicId: publicId } }).then((response) => response.json())) as apiResponseType<user>;
+  const foundUserData = (await GET(null, { params: { publicId: publicId } }).then((response) => response.json())) as apiResponseType<user>;
 
   return <>{foundUserData.data ? <UserProfile userData={foundUserData.data}></UserProfile> : <>Ten użytkownik nie istnieje :(</>}</>;
 };

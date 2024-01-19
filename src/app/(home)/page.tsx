@@ -1,7 +1,6 @@
 "use client";
 import Login from "@/components/Login/Login";
-import { Session, getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { Session } from "next-auth";
 import AdditionalInformationToSetProfile from "@/components/AdditionalInformationToSetProfile/AdditionalInformationToSetProfile";
 import Button from "@/components/UI/Button/Button";
 import { getSession, signOut } from "next-auth/react";
