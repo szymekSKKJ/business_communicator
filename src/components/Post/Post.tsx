@@ -3,6 +3,7 @@
 import styles from "./styles.module.scss";
 import testProfileImage from "../../../public/test_profile_image.jpg";
 import testPostImage from "../../../public/test_post_image.jpg";
+import testPostImage1 from "../../../public/test_post_image2.jpg";
 import heartIcon from "../../../public/post/heart.svg";
 import commentIcon from "../../../public/post/comment.svg";
 import shareIcon from "../../../public/post/share.svg";
@@ -21,6 +22,16 @@ const Post = () => {
   const [comments, setComments] = useState([
     {
       id: 1,
+      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. `,
+      username: "Disney+",
+    },
+    {
+      id: 2,
+      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. `,
+      username: "Disney+",
+    },
+    {
+      id: 3,
       content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. `,
       username: "Disney+",
     },
@@ -60,7 +71,7 @@ const Post = () => {
             <Image src={testPostImage} alt="Zdjęcie posta"></Image>
           </div>
           <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
+            <Image src={testPostImage1} alt="Zdjęcie posta"></Image>
           </div>
           <div className={`${styles.image}`}>
             <Image src={testPostImage} alt="Zdjęcie posta"></Image>
@@ -148,6 +159,19 @@ const Post = () => {
           </button>
         </div>
         <div className={`${styles.comments} ${areCommentsOpen ? styles.open : ""}`}>
+          <div className={`${styles.sendComment}`}>
+            <div className={`${styles.userData}`}>
+              <div className={`${styles.wrapper1}`}>
+                <Image src={testProfileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
+              </div>
+              <div className={`${styles.wrapper2}`}>
+                <p>Disney+</p>
+                <p>{moment(new Date()).locale("pl").fromNow()}</p>
+              </div>
+            </div>
+            <Textarea id="textarea" placeholder="Napisz komentarz"></Textarea>
+            <Button>Wyślij</Button>
+          </div>
           {comments.map((commentData) => {
             const { content, username, id } = commentData;
 
@@ -231,18 +255,6 @@ const Post = () => {
             }}>
             Czytaj więcej
           </button>
-          <div className={`${styles.sendComment}`}>
-            <div className={`${styles.userData}`}>
-              <div className={`${styles.wrapper1}`}>
-                <Image src={testProfileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
-              </div>
-              <div className={`${styles.wrapper2}`}>
-                <p>Disney+</p>
-              </div>
-            </div>
-            <Textarea id="textarea" placeholder="Napisz komentarz"></Textarea>
-            <Button>Wyślij</Button>
-          </div>
         </div>
       </div>
     </article>

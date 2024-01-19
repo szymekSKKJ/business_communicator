@@ -1,3 +1,4 @@
+"use client";
 import styles from "./styles.module.scss";
 import { ButtonHTMLAttributes, ReactNode } from "react";
 import { Prompt } from "next/font/google";
@@ -18,10 +19,14 @@ interface componentProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   themeType?: themeType;
 }
 
-const Button = ({ children, themeType = "blue-white" }: componentProps) => {
+const Button = ({ children, themeType = "blue-white", ...rest }: componentProps) => {
   const foundTheme = themes.find((themeData) => themeData.type === themeType)?.style;
 
-  return <button className={`${prompt.className} ${styles.button} ${foundTheme} `}>{children}</button>;
+  return (
+    <button className={`${prompt.className} ${styles.button} ${foundTheme} `} {...rest}>
+      {children}
+    </button>
+  );
 };
 
 export default Button;

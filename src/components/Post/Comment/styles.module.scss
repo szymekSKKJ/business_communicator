@@ -1,6 +1,7 @@
 @use "../../../app/fontColors.scss" as fontColors;
 
 .comment {
+  width: 100%;
   //background-color: #e9edf1;
   padding: 8px;
   border-radius: 8px;
@@ -13,7 +14,7 @@
     width: 100%;
     display: flex;
     align-items: center;
-    height: calc(var(--image-height) - 8px);
+    height: calc(var(--image-height) - 4px);
     margin-bottom: 4px;
 
     .wrapper1 {
@@ -21,8 +22,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: calc(var(--image-height) - 8px);
-      height: calc(var(--image-height) - 8px);
+      width: calc(var(--image-height) - 4px);
+      height: calc(var(--image-height) - 4px);
       border-radius: 100%;
 
       img {
@@ -103,6 +104,9 @@
     overflow: auto;
     transition: 500ms;
     scroll-behavior: smooth;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 
     button.readMore {
       width: 100%;
@@ -123,8 +127,10 @@
 
     .sendComment {
       height: auto;
-      display: none;
-      margin-top: 16px;
+      position: sticky;
+      top: 0px;
+      background-color: white;
+      padding: 10px 0px 10px 0px;
 
       > .userData {
         width: 100%;
@@ -180,9 +186,5 @@
 
   .replies.open {
     max-height: 800px;
-
-    .sendComment {
-      display: block;
-    }
   }
 }

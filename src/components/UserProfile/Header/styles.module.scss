@@ -57,6 +57,7 @@
     position: relative;
 
     .userData {
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -73,9 +74,10 @@
 
       p.proffesion {
         font-weight: 600;
-        font-size: 17px;
+        font-size: 16px;
         margin-top: 5px;
         margin-bottom: 20px;
+        color: #4988ce;
       }
 
       button {

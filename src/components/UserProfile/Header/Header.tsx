@@ -5,10 +5,15 @@ import Image from "next/image";
 import Button from "@/components/UI/Button/Button";
 import Star from "../../../../public/star.svg";
 import { Prompt } from "next/font/google";
+import { user } from "@/types";
 
 const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
-const Header = () => {
+interface componentProps {
+  userData: user;
+}
+
+const Header = ({ userData }: componentProps) => {
   return (
     <header className={`${styles.header}`} id="main-header">
       <div
@@ -22,9 +27,9 @@ const Header = () => {
       </div>
       <div className={`${styles.wrapper}`}>
         <div className={`${styles.userData}`}>
-          <p className={`${styles.username}`}>Disney+</p>
-          <p className={`${styles.id}`}>@Disneyplus</p>
-          <p className={`${styles.proffesion}`}>Świętuj historie, które kochasz. 💙</p>
+          <p className={`${styles.username}`}>{userData.name}</p>
+          <p className={`${styles.id}`}>@{userData.publicId}</p>
+          <p className={`${styles.proffesion}`}>{userData.description} </p>
           <Button>Napisz wiadomość</Button>
         </div>
         <div className={`${styles.wrapper}`}>

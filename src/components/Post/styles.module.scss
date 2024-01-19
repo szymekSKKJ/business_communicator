@@ -98,6 +98,8 @@
         img {
           width: 100%;
           height: auto;
+          aspect-ratio: 1;
+          object-fit: cover;
         }
       }
 
@@ -176,27 +178,31 @@
     }
 
     .comments {
+      width: 100%;
       display: flex;
       flex-direction: column;
       gap: 0px;
       transition: 500ms;
       overflow: auto;
       max-height: 300px;
-      scrollbar-gutter: stable both-edges;
+      scrollbar-gutter: stable;
       scroll-behavior: smooth;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
 
       > * {
-        &:nth-child(1n + 2):is(:not(.readMore)) {
-          &:is(:not(.sendComment)) {
-            animation: disableChild 500ms forwards;
-            @keyframes disableChild {
-              0% {
-                display: block;
-              }
+        &:nth-child(1n + 3) {
+          animation: disableChild 500ms forwards;
+          display: none;
 
-              100% {
-                display: none;
-              }
+          @keyframes disableChild {
+            0% {
+              display: block;
+            }
+
+            100% {
+              display: none;
             }
           }
         }
@@ -219,10 +225,15 @@
       }
 
       .sendComment {
-        width: 100%;
         height: auto;
+        padding: 8px;
+        transition: 500ms;
         display: none;
-        margin-top: 16px;
+        position: sticky;
+        top: 0px;
+        background-color: white;
+        padding: 10px 0px 10px 0px;
+        z-index: 1;
 
         > .userData {
           width: 100%;
@@ -277,11 +288,13 @@
     }
 
     .comments.open {
-      max-height: 800px;
+      max-height: 1000px;
 
       > * {
-        animation: none !important;
-        display: block;
+        &:is(:not(.sendComment)) {
+          animation: none !important;
+          display: block;
+        }
       }
 
       .sendComment {

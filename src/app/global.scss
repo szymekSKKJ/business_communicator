@@ -8,6 +8,24 @@ html {
   scroll-behavior: smooth;
 }
 
+::-webkit-scrollbar {
+  width: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background: white;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bfbfbf;
+  border: solid 5px white;
+  border-radius: 10000px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #808080;
+}
+
 body {
   background-color: #e9edf1;
   color: black;

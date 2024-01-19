@@ -71,6 +71,19 @@ const Comment = ({ content, username }: componentProps) => {
         </button>
       </div>
       <div className={`${styles.replies} ${areRepliesOpen ? styles.open : ""}`}>
+        <div className={`${styles.sendComment}`}>
+          <div className={`${styles.userData}`}>
+            <div className={`${styles.wrapper1}`}>
+              <Image src={testProfileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
+            </div>
+            <div className={`${styles.wrapper2}`}>
+              <p>Disney+</p>
+              <p>{moment(new Date()).locale("pl").fromNow()}</p>
+            </div>
+          </div>
+          <Textarea id="textarea1" placeholder="Napisz komentarz"></Textarea>
+          <Button>Wyślij</Button>
+        </div>
         <Reply></Reply>
         <Reply></Reply>
         <Reply></Reply>
@@ -84,18 +97,6 @@ const Comment = ({ content, username }: componentProps) => {
         <Reply></Reply>
         <Reply></Reply>
         <button className={`${styles.readMore}`}>Czytaj więcej</button>
-        <div className={`${styles.sendComment}`}>
-          <div className={`${styles.userData}`}>
-            <div className={`${styles.wrapper1}`}>
-              <Image src={testProfileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
-            </div>
-            <div className={`${styles.wrapper2}`}>
-              <p>Disney+</p>
-            </div>
-          </div>
-          <Textarea id="textarea1" placeholder="Napisz komentarz"></Textarea>
-          <Button>Wyślij</Button>
-        </div>
       </div>
     </div>
   );
