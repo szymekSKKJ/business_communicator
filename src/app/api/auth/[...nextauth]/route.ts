@@ -35,13 +35,12 @@ export const authOptions = {
       session.user.publicId = userData?.publicId;
       session.user.description = userData?.description;
 
-      return session as {
-        user: user;
-      };
+      return session;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET,
 };
-//@ts-ignore
+
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
