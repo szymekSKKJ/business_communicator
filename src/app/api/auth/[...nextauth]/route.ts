@@ -52,6 +52,3 @@ export const authOptions = {
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
-function FacebookProvider(arg0: { clientId: string | undefined; clientSecret: string | undefined }) {
-  throw new Error("Function not implemented.");
-}
