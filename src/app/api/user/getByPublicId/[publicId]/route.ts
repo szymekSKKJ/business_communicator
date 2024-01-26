@@ -44,7 +44,11 @@ export const GET = async (Request: Request, { params: { publicId } }: { params: 
 };
 
 export const userGetByPublicId = async (publicId: string) => {
-  const responseData = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/user/getByPublicId/${publicId}`).then(async (response) => await response.json());
+  const responseData = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/user/getByPublicId/${publicId}`, {
+    next: {
+      revalidate: 30,
+    },
+  }).then(async (response) => await response.json());
 
   return responseData;
 };
