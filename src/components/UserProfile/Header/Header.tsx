@@ -1,6 +1,5 @@
 import styles from "./styles.module.scss";
-import testBanner from "../../../../public/test_banner.jpg";
-import testProfileImage from "../../../../public/test_profile_image.jpg";
+
 import Image from "next/image";
 import Button from "@/components/UI/Button/Button";
 import Star from "../../../../public/star.svg";
@@ -19,10 +18,10 @@ const Header = ({ userData }: componentProps) => {
       <div
         className={`${styles.banner}`}
         style={{
-          backgroundImage: `url("${testBanner.src}")`,
+          backgroundImage: `url("${userData.backgroundImage}")`,
         }}>
         <div className={`${styles.profileImage}`}>
-          <Image src={testProfileImage} alt="Zdjęcie użytkownika"></Image>
+          <Image src={userData.profileImage} alt="Zdjęcie użytkownika" width={256} height={256}></Image>
         </div>
       </div>
       <div className={`${styles.wrapper}`}>
@@ -53,19 +52,7 @@ const Header = ({ userData }: componentProps) => {
           <Button>Obserwuj</Button>
         </div>
       </div>
-      <div className={`${styles.socialLinks}`}>
-        <ul>
-          <li>
-            <a href="https://www.facebook.com/disney">https://www.facebook.com/disney</a>
-          </li>
-          <li>
-            <a href="https://www.instagram.com/disney">https://www.instagram.com/disney</a>
-          </li>
-          <li>
-            <a href="https://www.linkedin.com/in/disney">https://www.linkedin.com/in/disney</a>
-          </li>
-        </ul>
-      </div>
+
       <nav>
         <button className={`${prompt.className} ${styles.active}`}>Posty</button>
         <button className={`${prompt.className}`}>Informacje</button>

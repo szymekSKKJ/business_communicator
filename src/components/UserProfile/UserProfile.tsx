@@ -1,22 +1,34 @@
-"use client";
 import styles from "./styles.module.scss";
 import Header from "./Header/Header";
 import Background from "./Background/Background";
-import Post from "../Post/Post";
 import { user } from "@/types";
+import Post from "../Post/Post";
+import CreatePost from "../CreatePost/CreatePost";
+import { post, postGetSome } from "@/app/api/post/getSome/[userId]/route";
 
 interface componentProps {
   userData: user;
 }
 
-const UserProfile = ({ userData }: componentProps) => {
+const UserProfile = async ({ userData }: componentProps) => {
+  const last20Posts = await postGetSome(userData.id);
+
   return (
     <div className={`${styles.userProfile}`}>
-      <Background></Background>
+      <Background backgroundUrl={userData.backgroundImage}></Background>
       <div className={`${styles.content}`}>
         <Header userData={userData}></Header>
-        <Post></Post>
-        <Post></Post>
+
+        <div className={`${styles.posts}`}>
+          <CreatePost userImageUrl={userData.profileImage} username={userData.name} userId={userData.id}></CreatePost>
+          {last20Posts.status === 200 &&
+            last20Posts.data.length !== 0 &&
+            last20Posts.data.map((postData) => {
+              const { id } = postData;
+
+              return <Post key={id} userId={userData.id} postData={postData} userImageUrl={userData.profileImage} username={userData.name}></Post>;
+            })}
+        </div>
       </div>
     </div>
   );

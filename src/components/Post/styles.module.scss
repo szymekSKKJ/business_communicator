@@ -2,7 +2,6 @@
 
 .post {
   width: 100%;
-  max-width: 700px;
   height: auto;
   padding: 8px;
   border-radius: 8px;
@@ -72,7 +71,7 @@
 
       width: 100%;
       height: auto;
-      height: 700px;
+      max-height: 700px;
       display: flex;
       gap: var(--gap);
       align-items: flex-start;
@@ -103,14 +102,14 @@
         }
       }
 
-      &:has(:nth-child(2)) {
+      &:has(> :nth-child(2)) {
         .image:nth-child(1),
         .image:nth-child(2) {
           width: calc((100% - var(--gap)) / 2);
         }
       }
 
-      &:has(:nth-child(3)) {
+      &:has(> :nth-child(3)) {
         .image:nth-child(1) {
           width: 100%;
         }
@@ -121,13 +120,13 @@
         }
       }
 
-      &:has(:nth-child(4)) {
+      &:has(> :nth-child(4)) {
         .image {
           width: calc((100% - var(--gap)) / 2) !important;
         }
       }
 
-      &:has(:nth-child(5)) {
+      &:has(> :nth-child(5)) {
         .image:nth-child(1),
         .image:nth-child(2) {
           width: calc((100% - var(--gap)) / 2) !important;

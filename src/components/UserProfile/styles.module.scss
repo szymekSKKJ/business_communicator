@@ -8,5 +8,15 @@
     width: 100%;
     max-width: 1300px;
     margin: 0px auto 0px auto;
+
+    .posts {
+      width: 700px;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      margin-left: auto;
+    }
   }
 }

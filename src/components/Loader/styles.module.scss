@@ -1,0 +1,21 @@
+.loader {
+  width: 100dvw;
+  height: 100dvh;
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: opacity 250ms;
+  pointer-events: none;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 1000000000000000000;
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+}
+
+.loader.visible {
+  opacity: 1;
+  pointer-events: all;
+}

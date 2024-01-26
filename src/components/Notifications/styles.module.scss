@@ -1,0 +1,79 @@
+.notification {
+  width: 100dvw;
+  height: auto;
+  background-color: rgba(73, 135, 206, 0.8);
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  transform: translateY(-100%);
+  animation: apearNotifiaction 3500ms forwards;
+  opacity: 0;
+  z-index: 1000000000;
+  backdrop-filter: blur(4px);
+  padding: 8px 16px 8px 4px;
+
+  @keyframes apearNotifiaction {
+    0% {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    10% {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+    90% {
+      transform: translateY(0%);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+  }
+
+  p {
+    text-align: center;
+
+    color: white;
+    font-weight: 500;
+    font-size: 17px;
+
+    @media screen and (max-width: 425px) {
+      font-size: 15px;
+    }
+  }
+}
+
+.readMore {
+  width: 100dvw;
+  height: 100dvh;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000000000;
+
+  .content {
+    width: 80%;
+    height: auto;
+    aspect-ratio: 16/9;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border-radius: 4px;
+
+    p {
+      color: white;
+      font-size: 14px;
+    }
+  }
+}
+
+.notification.failure {
+  background-color: rgba(255, 51, 92, 0.8);
+}

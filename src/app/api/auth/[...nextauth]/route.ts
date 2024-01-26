@@ -3,9 +3,8 @@ import type { Adapter } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/prisma";
-import { user } from "@/types";
 
-const authOptions = {
+export const authOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     GoogleProvider({
@@ -19,7 +18,13 @@ const authOptions = {
         },
       },
     }),
+
+    // FacebookProvider({
+    //   clientId: process.env.FACEBOOK_CLIENT_ID,
+    //   clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    // }),
   ],
+
   callbacks: {
     async signIn({ account }: { account: any }) {
       return true;
@@ -31,9 +36,12 @@ const authOptions = {
         },
       });
 
-      session.user.id = user.id;
+      session.user.id = userData?.id;
       session.user.publicId = userData?.publicId;
       session.user.description = userData?.description;
+      session.user.profileImage = userData?.image;
+      session.user.name = userData?.name;
+      session.user.email = userData?.email;
 
       return session;
     },
@@ -44,3 +52,6 @@ const authOptions = {
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
+function FacebookProvider(arg0: { clientId: string | undefined; clientSecret: string | undefined }) {
+  throw new Error("Function not implemented.");
+}

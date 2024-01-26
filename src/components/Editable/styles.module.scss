@@ -1,0 +1,141 @@
+.editable {
+  display: flex;
+  align-items: center;
+
+  .editableChild {
+    width: 100%;
+
+    > * {
+      width: 100%;
+      color: inherit;
+      padding: 8px;
+      border-radius: 4px;
+      outline: 3px solid transparent;
+      transition: outline 150ms;
+      position: relative;
+      cursor: pointer !important;
+      outline: 3px solid rgba(24, 167, 124, 0.2);
+      font-weight: 400;
+
+      &:empty::before {
+        content: attr(placeholder);
+        color: inherit;
+        font-style: italic;
+        pointer-events: none;
+        opacity: 0.5;
+      }
+
+      &:not(:empty) {
+        outline: 3px solid rgba(24, 167, 124, 0);
+      }
+
+      &:focus {
+        outline: 3px solid #18a77c;
+
+        .createdElement {
+          &:hover {
+            outline: 3px #18a77c solid;
+          }
+        }
+      }
+
+      &:not(:focus) {
+        &:hover {
+          outline: 3px solid rgba(24, 167, 124, 0.5);
+
+          &:empty {
+            &::after {
+              opacity: 1;
+            }
+          }
+        }
+      }
+
+      &::after {
+        content: attr(placeholder);
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.25);
+        top: 0px;
+        left: 0px;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        transition: 250ms;
+        font-weight: inherit;
+        font-size: inherit;
+        font-style: italic;
+      }
+
+      .createdElement {
+        background-color: rgba(0, 0, 0, 0);
+        cursor: pointer;
+        border-radius: 3px;
+        transition: 150ms;
+        outline: 3px transparent solid;
+      }
+    }
+  }
+
+  .editableChild.noPadding {
+    > * {
+      padding: 0px;
+    }
+  }
+
+  .delete {
+    width: auto;
+    height: auto;
+    background-color: #ff667d;
+    border-radius: 4px;
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    cursor: pointer;
+    transition: 250ms;
+    padding: 6px;
+    margin-left: 10px;
+    overflow: hidden;
+
+    &:hover {
+      background-color: #ff8093;
+    }
+  }
+}
+
+.context_menu {
+  background-color: rgba(0, 0, 0, 0.25);
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000000000;
+  backdrop-filter: blur(6px);
+  border-radius: 0px 4px 4px 4px;
+
+  .option {
+    font-size: 18px;
+    text-align: left;
+    padding: 6px 12px 6px 12px;
+    background-color: rgba(0, 0, 0, 0);
+    border: unset;
+    transition: 250ms;
+    color: white;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.125);
+    }
+  }
+}

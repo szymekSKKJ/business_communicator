@@ -46,15 +46,56 @@ model VerificationToken {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    publicId      String?   @unique
-    description   String?
-    accounts      Account[]
-    sessions      Session[]
+    id                   String           @id @default(cuid())
+    name                 String?
+    email                String?          @unique
+    emailVerified        DateTime?
+    image                String?
+    publicId             String?          @unique
+    description          String?
+    accounts             Account[]
+    sessions             Session[]
+    likedPosts           Post[]           @relation("likedPosts")
+    posts                Post[]           @relation("createdPosts")
+    sharedPosts          Post[]           @relation("sharedPosts")
+    PostSubComment       PostSubComment[]
+    likedPostComments    PostComment[]    @relation("likedPostComments")
+    PostComment          PostComment[]
+    likedPostSubComments PostSubComment[] @relation("liked")
 }
 
 // Next auth end
+
+model Post {
+    id         String        @id @default(cuid())
+    author     User          @relation("createdPosts", fields: [authorId], references: [id])
+    authorId   String
+    createdAt  DateTime      @default(now())
+    content    String
+    likedBy    User[]        @relation("likedPosts")
+    Comment    PostComment[]
+    sharedBy   User[]        @relation("sharedPosts")
+    imagesData Json
+}
+
+model PostComment {
+    id             String           @id @default(cuid())
+    author         User             @relation(fields: [authorId], references: [id])
+    authorId       String
+    createdAt      DateTime         @default(now())
+    post           Post             @relation(fields: [postId], references: [id])
+    postId         String
+    PostSubComment PostSubComment[]
+    likedBy        User[]           @relation("likedPostComments")
+}
+
+model PostSubComment {
+    id            String      @id @default(cuid())
+    author        User        @relation(fields: [authorId], references: [id])
+    authorId      String
+    createdAt     DateTime    @default(now())
+    postComment   PostComment @relation(fields: [postCommentId], references: [id])
+    postCommentId String
+    content       String
+    likedBy       User[]      @relation("liked")
+}

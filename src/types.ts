@@ -1,10 +1,11 @@
 export type user = {
   id: string;
   email: string;
-  name: string | null | undefined;
-  image: string | null | undefined;
-  publicId: string | null | undefined;
-  description: string | null | undefined;
+  name: string;
+  profileImage: string;
+  publicId: string;
+  description: string;
+  backgroundImage: string | null;
 };
 
 export type apiResponseType<dataResponse> = {

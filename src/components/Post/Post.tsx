@@ -15,10 +15,19 @@ import Comment from "./Comment/Comment";
 import { useRef, useState } from "react";
 import Button from "../UI/Button/Button";
 import Textarea from "../UI/Textarea/Textarea";
+import { post } from "@/app/api/post/getSome/[userId]/route";
+import { postLike } from "@/app/api/post/like/[postId]/route";
 
 const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
-const Post = () => {
+interface componentProps {
+  userImageUrl: string;
+  username: string;
+  postData: post;
+  userId: string;
+}
+
+const Post = ({ userImageUrl, username, postData, userId }: componentProps) => {
   const [comments, setComments] = useState([
     {
       id: 1,
@@ -40,9 +49,7 @@ const Post = () => {
 
   const mainParentElementRef = useRef<null | HTMLElement>(null);
 
-  const date = new Date();
-
-  date.setDate(new Date().getDate() - 5);
+  const date = new Date(postData.createdAt);
 
   const formatedDate = moment(date);
 
@@ -52,58 +59,44 @@ const Post = () => {
     <article className={`${styles.post}`} ref={mainParentElementRef}>
       <div className={`${styles.userData}`}>
         <div className={`${styles.wrapper1}`}>
-          <Image src={testProfileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
+          <Image src={userImageUrl} alt="Zdjęcie autora postu" width={64} height={64}></Image>
         </div>
         <div className={`${styles.wrapper2}`}>
-          <p>Disney+</p>
+          <p>{username}</p>
           <p>
             {formatedDate.fromNow()} o {date.toLocaleTimeString("pl-PL", { hour: "numeric", minute: "numeric" })}
           </p>
         </div>
       </div>
       <div className={`${styles.content}`}>
-        <p>
-          Ty: Chętnie poznam kogoś nowego. <br></br>My: Nowe, ikoniczne trio już w Disney+. Poznajcie się! <br></br> Oglądaj nowe odcinki serialu „Percy Jackson
-          i bogowie olimpijscy” w każdą środę w Disney+. 🔱
-        </p>
+        <p>{postData.content}</p>
         <div className={`${styles.images}`}>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage1} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
-          <div className={`${styles.image}`}>
-            <Image src={testPostImage} alt="Zdjęcie posta"></Image>
-          </div>
+          {postData.imagesData
+            .sort((a, b) => a.order - b.order)
+            .map((imageData) => {
+              const { id, url } = imageData;
+
+              return (
+                <div
+                  className={`${styles.image}`}
+                  key={id}
+                  onClick={() => {
+                    window.open(url);
+                  }}>
+                  <Image src={url} alt="Zdjęcie posta" width={2048} height={2048}></Image>
+                </div>
+              );
+            })}
         </div>
         <div className={`${styles.options}`}>
-          <button className={`${montserrat.className}`}>
-            <Image src={heartIcon} alt="Ikona"></Image> Polub <span>3 408</span>
+          <button
+            className={`${montserrat.className}`}
+            onClick={async () => {
+              const k = await postLike(postData.id, userId);
+
+              console.log(k);
+            }}>
+            <Image src={heartIcon} alt="Ikona"></Image> Polub <span>{postData._count.likedBy}</span>
           </button>
           <button
             className={`${montserrat.className}`}
@@ -158,11 +151,11 @@ const Post = () => {
             <Image src={shareIcon} alt="Ikona"></Image>Udostępnij <span>10k+ </span>
           </button>
         </div>
-        <div className={`${styles.comments} ${areCommentsOpen ? styles.open : ""}`}>
+        {/* <div className={`${styles.comments} ${areCommentsOpen ? styles.open : ""}`}>
           <div className={`${styles.sendComment}`}>
             <div className={`${styles.userData}`}>
               <div className={`${styles.wrapper1}`}>
-                <Image src={testProfileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
+                <Image src={userImageUrl} alt="Zdjęcie autora postu" width={64} height={64}></Image>
               </div>
               <div className={`${styles.wrapper2}`}>
                 <p>Disney+</p>
@@ -255,7 +248,7 @@ const Post = () => {
             }}>
             Czytaj więcej
           </button>
-        </div>
+        </div> */}
       </div>
     </article>
   );

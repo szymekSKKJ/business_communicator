@@ -1,21 +1,15 @@
-"use client";
 import Login from "@/components/Login/Login";
 import { Session } from "next-auth";
-import AdditionalInformationToSetProfile from "@/components/AdditionalInformationToSetProfile/AdditionalInformationToSetProfile";
 import Button from "@/components/UI/Button/Button";
 import { getSession, signOut } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { user } from "@/types";
+import EditUserProfile from "@/components/EditUserProfile/EditUserProfile";
+import { GET, authOptions } from "../api/auth/[...nextauth]/route";
+import { getServerSession } from "next-auth/next";
 
-const HomePage = () => {
-  const [session, setSession] = useState<null | Session>(null);
-
-  useEffect(() => {
-    (async () => {
-      const session = await getSession();
-      setSession(session);
-    })();
-  }, []);
+const HomePage = async () => {
+  const session = await getServerSession(authOptions);
 
   if (session && session.user) {
     const userMisingInformation = Object.keys(session.user).some((key) => {
@@ -24,18 +18,9 @@ const HomePage = () => {
       }
     });
 
-    return (
-      <>
-        {userMisingInformation ? (
-          <AdditionalInformationToSetProfile userData={session.user as user}></AdditionalInformationToSetProfile>
-        ) : (
-          <>
-            <p>Zalogowany jako: {session.user.name}</p>
-            <Button onClick={() => signOut()}>Wyloguj się</Button>
-          </>
-        )}
-      </>
-    );
+    if (true) {
+      return <EditUserProfile userData={session.user}></EditUserProfile>;
+    }
   } else {
     return <Login></Login>;
   }

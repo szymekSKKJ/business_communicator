@@ -19,11 +19,11 @@ interface componentProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   themeType?: themeType;
 }
 
-const Button = ({ children, themeType = "blue-white", ...rest }: componentProps) => {
+const Button = ({ children, themeType = "blue-white", className, ...rest }: componentProps) => {
   const foundTheme = themes.find((themeData) => themeData.type === themeType)?.style;
 
   return (
-    <button className={`${prompt.className} ${styles.button} ${foundTheme} `} {...rest}>
+    <button className={`${prompt.className} ${styles.button} ${foundTheme} ${className}`} {...rest}>
       {children}
     </button>
   );
