@@ -1,7 +1,6 @@
 import prisma from "@/prisma";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import "../../../../../firebaseInitialization";
-import { errorMonitor } from "events";
 
 export const GET = async (request: Request, { params: { userId } }: { params: { userId: string } }) => {
   try {
@@ -56,21 +55,12 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
 export type post = { id: string; createdAt: string; content: string; _count: { likedBy: number }; imagesData: { id: string; url: string; order: number }[] };
 
 export const postGetSome = async (userId: string, skip: string = "0", take: string = "20") => {
-  try {
-    const responseData = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/post/getSome/${userId}?skip=${skip}&take=${take}`).then(
-      async (response) => await response.json()
-    );
+  const responseData = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/post/getSome/${userId}?skip=${skip}&take=${take}`).then(
+    async (response) => await response.json()
+  );
 
-    return responseData as {
-      data: post[];
-      status: number;
-    };
-  } catch (e) {
-    const error = e as Error;
-    return {
-      data: null,
-      error: error.message,
-      status: 500,
-    };
-  }
+  return responseData as {
+    data: post[];
+    status: number;
+  };
 };
