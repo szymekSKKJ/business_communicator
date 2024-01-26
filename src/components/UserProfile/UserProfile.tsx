@@ -12,6 +12,7 @@ interface componentProps {
 
 const UserProfile = async ({ userData }: componentProps) => {
   const last20Posts = await postGetSome(userData.id);
+  // lol
 
   return (
     <div className={`${styles.userProfile}`}>
