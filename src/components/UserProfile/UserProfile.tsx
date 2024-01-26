@@ -22,6 +22,7 @@ const UserProfile = async ({ userData }: componentProps) => {
         <div className={`${styles.posts}`}>
           <CreatePost userImageUrl={userData.profileImage} username={userData.name} userId={userData.id}></CreatePost>
           {last20Posts.status === 200 &&
+            last20Posts.data &&
             last20Posts.data.length !== 0 &&
             last20Posts.data.map((postData) => {
               const { id } = postData;
