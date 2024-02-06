@@ -53,7 +53,7 @@ const Notifications = () => {
           <div key={id}>
             <div
               className={`${styles.notification} ${type === "failure" ? styles.failure : ""}`}
-              onClick={() => {
+              onDoubleClick={() => {
                 if (additional.length !== 0) {
                   setIsReadMoreOpen((currentValue) => (currentValue === false ? true : false));
                   const copiedNotifications = [...notifications.value];

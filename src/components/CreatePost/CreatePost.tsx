@@ -17,11 +17,11 @@ const isEmpty = (str: string) => !str || /^\s*$/.test(str);
 
 interface componentProps {
   userImageUrl: string;
-  username: string;
+  publicId: string;
   userId: string;
 }
 
-const CreatePost = ({ userImageUrl, username, userId }: componentProps) => {
+const CreatePost = ({ userImageUrl, publicId, userId }: componentProps) => {
   const [images, setImages] = useState<
     {
       id: string;
@@ -46,7 +46,7 @@ const CreatePost = ({ userImageUrl, username, userId }: componentProps) => {
             <Image src={userImageUrl} alt="Zdjęcie autora postu" width={64} height={64}></Image>
           </div>
           <div className={`${styles.wrapper2}`}>
-            <p>{username}</p>
+            <p>{publicId}</p>
             <p>{moment(new Date()).locale("pl").fromNow()}</p>
           </div>
         </div>
@@ -164,6 +164,7 @@ const CreatePost = ({ userImageUrl, username, userId }: componentProps) => {
 
                 if (responseData.status === 200) {
                   textareaElement.innerText = "";
+
                   setImages([]);
                 } else {
                   createNotification("Wystąpił nieoczekiwany błąd. Przepraszamy", "failure", [responseData.error!]);

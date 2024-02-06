@@ -1,11 +1,10 @@
 "use client";
 
-import { user } from "@/types";
+import { user } from "@/app/api/user/types";
 import Background from "./Background/Background";
 import Header from "./Header/Header";
 import styles from "./styles.module.scss";
 import { useState } from "react";
-import Post from "../Post/Post";
 
 interface componentProps {
   userData: user;

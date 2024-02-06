@@ -1,11 +1,6 @@
 import Login from "@/components/Login/Login";
-import { Session } from "next-auth";
-import Button from "@/components/UI/Button/Button";
-import { getSession, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
-import { user } from "@/types";
 import EditUserProfile from "@/components/EditUserProfile/EditUserProfile";
-import { GET, authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "../api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth/next";
 
 const HomePage = async () => {

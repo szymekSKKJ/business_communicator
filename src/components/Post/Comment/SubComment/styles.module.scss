@@ -2,6 +2,7 @@
 
 .reply {
   width: 100%;
+  padding: 8px;
 
   --image-height: 42px;
 
@@ -21,9 +22,19 @@
       justify-content: center;
       align-items: center;
 
-      img {
+      &:hover + .wrapper2 a {
+        color: #4988ce;
+      }
+
+      a {
         width: 100%;
-        height: auto;
+        height: 100%;
+        cursor: pointer;
+
+        img {
+          width: 100%;
+          height: auto;
+        }
       }
     }
 
@@ -34,6 +45,21 @@
       flex-direction: column;
       justify-content: center;
       gap: 2px;
+
+      a {
+        width: auto;
+        cursor: pointer;
+        text-decoration: none;
+        align-self: flex-start;
+
+        &:hover {
+          color: #4988ce;
+        }
+
+        &:visited {
+          color: inherit;
+        }
+      }
 
       p {
         &:first-child {
@@ -91,6 +117,10 @@
 
       img {
         width: 20px;
+      }
+
+      i {
+        font-size: 20px;
       }
     }
   }

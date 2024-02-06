@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./styles.module.scss";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 async function handleImage(url: string) {
   const imgElement = document.createElement("img");

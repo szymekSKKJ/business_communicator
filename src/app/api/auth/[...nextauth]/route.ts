@@ -4,6 +4,14 @@ import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/prisma";
 
+export type sessionUser = {
+  id: string;
+  publicId: string;
+  description: string;
+  name: string;
+  email: string;
+};
+
 export const authOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
@@ -39,7 +47,6 @@ export const authOptions = {
       session.user.id = userData?.id;
       session.user.publicId = userData?.publicId;
       session.user.description = userData?.description;
-      session.user.profileImage = userData?.image;
       session.user.name = userData?.name;
       session.user.email = userData?.email;
 

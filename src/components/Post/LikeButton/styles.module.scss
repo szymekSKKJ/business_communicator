@@ -1,0 +1,31 @@
+.likeButton {
+  &:has(i.faSolid) {
+    color: #4988ce;
+
+    i.faSolid {
+      color: #4988ce;
+    }
+
+    i.faSolid.afterFirstClick {
+      animation: apearHeartIcon 250ms forwards;
+      transform: scale(0.5);
+
+      @keyframes apearHeartIcon {
+        0% {
+          opacity: 0;
+          transform: scale(0.5);
+        }
+        60% {
+          transform: scale(1.15);
+        }
+        80% {
+          transform: scale(0.9);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+    }
+  }
+}

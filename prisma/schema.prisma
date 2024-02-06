@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-    provider          = "postgresql"
-    url               = env("POSTGRES_PRISMA_URL")
-    shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+    provider = "postgresql"
+    url      = env("POSTGRES_PRISMA_URL")
 }
 
 // Next auth start
@@ -46,22 +45,45 @@ model VerificationToken {
 }
 
 model User {
-    id                   String           @id @default(cuid())
-    name                 String?
-    email                String?          @unique
-    emailVerified        DateTime?
-    image                String?
-    publicId             String?          @unique
-    description          String?
-    accounts             Account[]
-    sessions             Session[]
-    likedPosts           Post[]           @relation("likedPosts")
-    posts                Post[]           @relation("createdPosts")
-    sharedPosts          Post[]           @relation("sharedPosts")
-    PostSubComment       PostSubComment[]
-    likedPostComments    PostComment[]    @relation("likedPostComments")
-    PostComment          PostComment[]
-    likedPostSubComments PostSubComment[] @relation("liked")
+    id                       String                @id @default(cuid())
+    name                     String?
+    email                    String?               @unique
+    emailVerified            DateTime?
+    image                    String?
+    publicId                 String?               @unique
+    description              String?
+    accounts                 Account[]
+    sessions                 Session[]
+    posts                    Post[]                @relation("createdPosts")
+    likedPosts               Post[]                @relation("likedPosts")
+    sharedPosts              Post[]                @relation("sharedPosts")
+    postComment              PostComment[]
+    likedPostComments        PostComment[]         @relation("likedPostComments")
+    postSubComment           PostSubComment[]
+    likedPostSubComments     PostSubComment[]      @relation("likedPostSubComments")
+    postSubCommentReply      PostSubCommentReply[]
+    likedPostSubCommentReply PostSubCommentReply[] @relation("likedPostSubCommentReply")
+    opinions                 Opinion[]
+    following                User[]                @relation("following")
+    followers                User[]                @relation("following")
+    lastActive               DateTime              @default(now())
+    sentMessages             SentMessages[]        @relation("sender")
+}
+
+model SentMessages {
+    id           String   @id @default(cuid())
+    sentToUserId String
+    sender       User     @relation("sender", fields: [senderUserId], references: [id])
+    senderUserId String
+    content      String
+    sentAt       DateTime @default(now())
+}
+
+model Opinion {
+    id      String @id @default(cuid())
+    givenTo User   @relation(fields: [userId], references: [id])
+    userId  String
+    value   Int
 }
 
 // Next auth end
@@ -73,7 +95,7 @@ model Post {
     createdAt  DateTime      @default(now())
     content    String
     likedBy    User[]        @relation("likedPosts")
-    Comment    PostComment[]
+    comments   PostComment[]
     sharedBy   User[]        @relation("sharedPosts")
     imagesData Json
 }
@@ -85,17 +107,29 @@ model PostComment {
     createdAt      DateTime         @default(now())
     post           Post             @relation(fields: [postId], references: [id])
     postId         String
-    PostSubComment PostSubComment[]
+    postSubComment PostSubComment[]
     likedBy        User[]           @relation("likedPostComments")
+    content        String
 }
 
 model PostSubComment {
-    id            String      @id @default(cuid())
-    author        User        @relation(fields: [authorId], references: [id])
-    authorId      String
-    createdAt     DateTime    @default(now())
-    postComment   PostComment @relation(fields: [postCommentId], references: [id])
-    postCommentId String
-    content       String
-    likedBy       User[]      @relation("liked")
+    id                  String                @id @default(cuid())
+    author              User                  @relation(fields: [authorId], references: [id])
+    authorId            String
+    createdAt           DateTime              @default(now())
+    postComment         PostComment           @relation(fields: [postCommentId], references: [id])
+    postCommentId       String
+    content             String
+    likedBy             User[]                @relation("likedPostSubComments")
+    postSubCommentReply PostSubCommentReply[]
+}
+
+model PostSubCommentReply {
+    id               String         @id @default(cuid())
+    author           User           @relation(fields: [authorId], references: [id])
+    authorId         String
+    createdAt        DateTime       @default(now())
+    postSubComment   PostSubComment @relation(fields: [postSubCommentId], references: [id])
+    postSubCommentId String
+    likedBy          User[]         @relation("likedPostSubCommentReply")
 }

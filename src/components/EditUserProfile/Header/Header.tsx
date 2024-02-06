@@ -1,20 +1,18 @@
 "use client";
+
 import styles from "./styles.module.scss";
 import Image from "next/image";
 import Button from "@/components/UI/Button/Button";
 import Star from "../../../../public/star.svg";
 import { Prompt } from "next/font/google";
-import { user } from "@/types";
 import Editable from "@/components/Editable/Editable";
 import { Dispatch, SetStateAction, useRef, useState } from "react";
 import AvatarEditor from "react-avatar-editor";
-
 import { useRouter } from "next/navigation";
 import { createNotification } from "@/components/Notifications/Notifications";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { setLoaderVisibility } from "@/components/Loader/Loader";
-import { blob } from "stream/consumers";
 import { userUpdate } from "@/app/api/user/update/[id]/route";
+import { user } from "@/app/api/user/types";
 
 const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
@@ -38,7 +36,7 @@ const Header = ({ userData, setBackgroundImage }: componentProps) => {
     backgroundImage: null | File;
   }>({
     id: userData.id,
-    email: userData.email,
+    email: userData.email!,
     name: null,
     profileImage: null,
     publicId: null,
@@ -243,8 +241,8 @@ const Header = ({ userData, setBackgroundImage }: componentProps) => {
                 style={{ zIndex: "1000" }}
                 image={currentUserData.profileImage}
                 disableBoundaryChecks={false}
-                width={256}
-                height={256}
+                width={200}
+                height={200}
                 border={0}
                 scale={scaleForProfileImage}
                 rotate={0}
@@ -364,6 +362,9 @@ const Header = ({ userData, setBackgroundImage }: componentProps) => {
         <button className={`${prompt.className}`}>Informacje</button>
         <button className={`${prompt.className}`}>Zdjęcia</button>
         <button className={`${prompt.className}`}>Wzmianki</button>
+        <button className={`${prompt.className}`}>Obserwujących</button>
+        <button className={`${prompt.className}`}>Obserwuje</button>
+        <button className={`${prompt.className}`}>Opinie</button>
       </nav>
       <div className={`${styles.saveChanges}`}>
         <p>Kliknij w poszczególne sekcje swojego profilu aby je edytować lub prawym przyciskiem myszy aby zobaczyć więcej opcji</p>
@@ -397,43 +398,48 @@ const Header = ({ userData, setBackgroundImage }: componentProps) => {
               };
 
               avatarEditorForProfileImageRef.current?.getImageScaledToCanvas().toBlob(async (profileImageBlob) => {
+                const profileImageFile = new File([profileImageBlob!], "profileImage.webp", { type: profileImageBlob!.type });
+
                 if (currentUserData.backgroundImage) {
                   avatarEditorForBackgroundRef.current?.getImageScaledToCanvas().toBlob(async (backgroundImageBlob) => {
+                    const backgroundImageFile = new File([backgroundImageBlob!], "backgroundImage.webp", { type: backgroundImageBlob!.type });
+
                     const response = await userUpdate(
                       currentUserData.id,
                       preparedCurrentUserData.publicId,
                       preparedCurrentUserData.description,
                       preparedCurrentUserData.name,
-                      profileImageBlob as File,
-                      backgroundImageBlob as File
+                      profileImageFile,
+                      backgroundImageFile
                     );
-
-                    if (response.status === 200) {
+                    if (response.status === 200 && response.error === null) {
                       createNotification("Profil zaaktualizowany");
                       router.push(`/${currentUserData.publicId}`);
+                    } else if (response.status === 200) {
+                      createNotification(response.error!, "failure", [response.error!]);
                     } else {
-                      createNotification("Wystąpił niespodziewany błąd. Przepraszamy", "failure", [response.error]);
+                      createNotification("Wystąpił niespodziewany błąd. Przepraszamy", "failure", [response.error!]);
                     }
                     setLoaderVisibility(false);
-                  }, "image/jpeg");
+                  }, "image/webp");
                 } else {
                   const response = await userUpdate(
                     currentUserData.id,
                     preparedCurrentUserData.publicId,
                     preparedCurrentUserData.description,
                     preparedCurrentUserData.name,
-                    profileImageBlob as File
+                    profileImageFile
                   );
 
                   if (response.status === 200) {
                     createNotification("Profil zaaktualizowany");
                     router.push(`/${currentUserData.publicId}`);
                   } else {
-                    createNotification("Wystąpił niespodziewany błąd. Przepraszamy", "failure", [response.error]);
+                    createNotification("Wystąpił niespodziewany błąd. Przepraszamy", "failure", [response.error!]);
                   }
                   setLoaderVisibility(false);
                 }
-              }, "image/jpeg");
+              }, "image/webp");
             }
           }}>
           Zapisz

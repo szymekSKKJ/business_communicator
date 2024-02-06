@@ -3,6 +3,7 @@ import prisma from "@/prisma";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { getServerSession } from "next-auth";
 import "../../../../../firebaseInitialization";
+import { createResponse, response } from "@/app/api/responseTypes";
 
 export const POST = async (request: Request, { params: { id } }: { params: { id: string } }) => {
   try {
@@ -24,11 +25,13 @@ export const POST = async (request: Request, { params: { id } }: { params: { id:
       const storage = getStorage();
 
       if (requestData.get("profileImage")) {
-        await uploadBytes(ref(storage, `users/${id}/profileImage.jpg`), requestData.get("profileImage") as Blob);
+        const profileImageFile = requestData.get("profileImage") as File;
+        await uploadBytes(ref(storage, `users/${id}/${profileImageFile.name}`), profileImageFile);
       }
 
       if (requestData.get("backgroundImage")) {
-        await uploadBytes(ref(storage, `users/${id}/backgroundImage.jpg`), requestData.get("backgroundImage") as Blob);
+        const backgroundImageFile = requestData.get("backgroundImage") as File;
+        await uploadBytes(ref(storage, `users/${id}/${backgroundImageFile.name}`), backgroundImageFile);
       }
 
       if (requestData.get("description")) {
@@ -36,30 +39,46 @@ export const POST = async (request: Request, { params: { id } }: { params: { id:
       }
 
       if (requestData.get("publicId")) {
-        preparedDataToSave.publicId = requestData.get("publicId") as string;
+        const doesUserWithThisPublicIdAlreadyExist = await prisma.user.findUnique({
+          where: {
+            publicId: requestData.get("publicId") as string,
+          },
+        });
+
+        if (doesUserWithThisPublicIdAlreadyExist) {
+          return createResponse(200, "User with given id (@) already exsits", null);
+        } else {
+          preparedDataToSave.publicId = requestData.get("publicId") as string;
+        }
       }
 
       if (requestData.get("name")) {
         preparedDataToSave.name = requestData.get("name") as string;
       }
 
-      const updatedRecord = await prisma.user.update({
+      await prisma.user.update({
         where: { id: id },
         data: preparedDataToSave,
       });
 
-      return Response.json({ status: 200, data: updatedRecord });
+      return createResponse(200, null, null);
     } else {
-      throw new Error("User is not that user");
+      return createResponse(200, "User is not that user", null);
     }
   } catch (e: any) {
     const error = e as Error;
-
-    return Response.json({ status: 500, error: error.message, data: null });
+    return createResponse(500, error.message, null);
   }
 };
 
-export const userUpdate = async (userId: string, publicId?: string, description?: string, name?: string, profileImage?: File, backgroundImage?: File) => {
+export const userUpdate = async (
+  userId: string,
+  publicId?: string,
+  description?: string,
+  name?: string,
+  profileImage?: File,
+  backgroundImage?: File
+): Promise<response<null>> => {
   const formData = new FormData();
 
   if (profileImage) {
@@ -82,10 +101,10 @@ export const userUpdate = async (userId: string, publicId?: string, description?
     formData.append("name", name);
   }
 
-  const responseData = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/user/update/${userId}`, {
+  const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/user/update/${userId}`, {
     method: "POST",
     body: formData,
-  }).then(async (response) => await response.json());
+  }).then(async (response) => await response.json())) as response<null>;
 
   return responseData;
 };

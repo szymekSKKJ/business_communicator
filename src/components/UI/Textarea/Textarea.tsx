@@ -1,5 +1,5 @@
 "use client";
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, MutableRefObject, useEffect } from "react";
 import styles from "./styles.module.scss";
 import { Montserrat } from "next/font/google";
 
@@ -7,11 +7,18 @@ const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800
 
 interface componentProps extends HTMLAttributes<HTMLSpanElement> {
   placeholder: string;
+  refProp?: MutableRefObject<HTMLElement | null>;
 }
 
-const Textarea = ({ placeholder, ...rest }: componentProps) => {
+const Textarea = ({ placeholder, refProp, ...rest }: componentProps) => {
   return (
-    <div className={`${styles.textarea}`}>
+    <div
+      className={`${styles.textarea}`}
+      ref={(node) => {
+        if (refProp) {
+          refProp.current = node;
+        }
+      }}>
       <span
         className={`${montserrat.className}`}
         contentEditable={true}
