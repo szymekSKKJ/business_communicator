@@ -90,7 +90,7 @@ export const userGetByPublicId = async (publicId: string, isServerSide: boolean 
         revalidate: 10,
       },
       method: "GET",
-      headers: headers.headers() ? headers.headers() : undefined,
+      headers: new Headers(headers.headers()),
     }).then(async (response) => await response.json())) as response<user>;
 
     return responseData;
