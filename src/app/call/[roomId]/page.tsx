@@ -34,7 +34,11 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
   useEffect(() => {
     (async () => {
       const streamLocal = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          width: { ideal: 1280, min: 640 },
+          height: { ideal: 720, min: 360 },
+          frameRate: { ideal: 60, min: 30 },
+        },
         audio: {
           autoGainControl: false,
           echoCancellation: false,
