@@ -8,16 +8,13 @@ export const POST = async (request: Request, { params: { postId } }: { params: {
   const session = await getServerSession(authOptions);
 
   try {
-    const requestData = await request.formData();
-
-    const userId = requestData.get("userId") as string;
-
-    if (session.user.id === userId) {
+    if (session) {
+      const requestData = await request.formData();
       const content = requestData.get("content") as string;
 
       await prisma.postComment.create({
         data: {
-          authorId: userId,
+          authorId: session.user.id,
           content: content,
           postId: postId,
         },
@@ -33,10 +30,9 @@ export const POST = async (request: Request, { params: { postId } }: { params: {
   }
 };
 
-export const commentCreate = async (postId: string, userId: string, content: string): Promise<response<null>> => {
+export const commentCreate = async (postId: string, content: string): Promise<response<null>> => {
   const formData = new FormData();
 
-  formData.append("userId", `${userId}`);
   formData.append("content", `${content}`);
 
   const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/comment/create/${postId}`, {

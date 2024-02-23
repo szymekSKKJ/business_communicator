@@ -18,6 +18,7 @@ export const GET = async (request: Request, { params: { publicId } }: { params: 
         email: true,
         description: true,
         name: true,
+        lastActive: true,
         _count: {
           select: {
             followers: true,
@@ -42,17 +43,24 @@ export const GET = async (request: Request, { params: { publicId } }: { params: 
       const profileImageUrl = await getDownloadURL(ref(storage, `/users/${user.id}/profileImage.webp`));
 
       const session = await getServerSession(authOptions);
-      const doesCurrentUserFollowThisUser = await prisma.user.findFirst({
-        where: {
-          id: user.id,
-          followers: {
-            some: {
-              id: session.user.id,
-            },
-          },
-        },
-      });
 
+      const doesCurrentUserFollowThisUser =
+        session === null
+          ? false
+          : (await prisma.user.findFirst({
+              where: {
+                id: user!.id,
+                followers: {
+                  some: {
+                    id: session.user.id,
+                  },
+                },
+              },
+            })) === null
+          ? false
+          : true;
+
+      // #SKKJ sprawdź co jeżeli ktoś nie ma zdjęcia w tle
       try {
         const backgroundImageUrl = await getDownloadURL(ref(storage, `/users/${user.id}/backgroundImage.webp`));
 
@@ -80,6 +88,8 @@ export const GET = async (request: Request, { params: { publicId } }: { params: 
     return createResponse(500, error.message, null);
   }
 };
+
+export const dynamic = "force-dynamic";
 
 export const userGetByPublicId = async (publicId: string, isServerSide: boolean = false): Promise<response<user>> => {
   if (isServerSide) {

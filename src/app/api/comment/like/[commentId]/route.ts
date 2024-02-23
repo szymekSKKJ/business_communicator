@@ -7,12 +7,9 @@ import { createResponse, response } from "@/app/api/responseTypes";
 export const POST = async (request: Request, { params: { commentId } }: { params: { commentId: string } }) => {
   const session = await getServerSession(authOptions);
 
-  const requestData = await request.formData();
-
-  const userId = requestData.get("userId") as string;
-
   try {
-    if (session.user.id === userId) {
+    if (session) {
+      const requestData = await request.formData();
       const doesUserLikeThisComment = requestData.get("doesUserLikeThisComment") as string;
 
       if (doesUserLikeThisComment === "true") {
@@ -21,13 +18,13 @@ export const POST = async (request: Request, { params: { commentId } }: { params
             id: commentId,
             likedBy: {
               some: {
-                id: userId,
+                id: session.user.id,
               },
             },
           },
           data: {
             likedBy: {
-              disconnect: [{ id: userId }],
+              disconnect: [{ id: session.user.id }],
             },
           },
         });
@@ -39,13 +36,13 @@ export const POST = async (request: Request, { params: { commentId } }: { params
             id: commentId,
             likedBy: {
               none: {
-                id: userId,
+                id: session.user.id,
               },
             },
           },
           data: {
             likedBy: {
-              set: [{ id: userId }],
+              set: [{ id: session.user.id }],
             },
           },
         });
@@ -61,10 +58,9 @@ export const POST = async (request: Request, { params: { commentId } }: { params
   }
 };
 
-export const commentLike = async (commentId: string, userId: string, doesUserLikeThisComment: boolean): Promise<response<null>> => {
+export const commentLike = async (commentId: string, doesUserLikeThisComment: boolean): Promise<response<null>> => {
   const formData = new FormData();
 
-  formData.append("userId", `${userId}`);
   formData.append("doesUserLikeThisComment", `${doesUserLikeThisComment}`);
 
   const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/comment/like/${commentId}`, {

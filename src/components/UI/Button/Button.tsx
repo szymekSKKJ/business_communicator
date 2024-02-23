@@ -5,12 +5,16 @@ import { Prompt } from "next/font/google";
 
 const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
-type themeType = "blue-white";
+type themeType = "blue-white" | "red-white";
 
 const themes = [
   {
     type: "blue-white",
     style: styles.blueWhite,
+  },
+  {
+    type: "red-white",
+    style: styles.redWhite,
   },
 ];
 

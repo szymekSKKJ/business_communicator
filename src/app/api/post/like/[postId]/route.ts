@@ -7,10 +7,9 @@ import { createResponse, response } from "@/app/api/responseTypes";
 export const POST = async (request: Request, { params: { postId } }: { params: { postId: string } }) => {
   const session = await getServerSession(authOptions);
   const requestData = await request.formData();
-  const userId = requestData.get("userId") as string;
 
   try {
-    if (session.user.id === userId) {
+    if (session) {
       const doesUserLikeThisPost = requestData.get("doesUserLikeThisPost") as string;
 
       if (doesUserLikeThisPost === "true") {
@@ -19,13 +18,13 @@ export const POST = async (request: Request, { params: { postId } }: { params: {
             id: postId,
             likedBy: {
               some: {
-                id: userId,
+                id: session.user.id,
               },
             },
           },
           data: {
             likedBy: {
-              disconnect: [{ id: userId }],
+              disconnect: [{ id: session.user.id }],
             },
           },
         });
@@ -37,13 +36,13 @@ export const POST = async (request: Request, { params: { postId } }: { params: {
             id: postId,
             likedBy: {
               none: {
-                id: userId,
+                id: session.user.id,
               },
             },
           },
           data: {
             likedBy: {
-              set: [{ id: userId }],
+              set: [{ id: session.user.id }],
             },
           },
         });
@@ -59,10 +58,9 @@ export const POST = async (request: Request, { params: { postId } }: { params: {
   }
 };
 
-export const postLike = async (postId: string, userId: string, doesUserLikeThisPost: boolean): Promise<response<null>> => {
+export const postLike = async (postId: string, doesUserLikeThisPost: boolean): Promise<response<null>> => {
   const formData = new FormData();
 
-  formData.append("userId", `${userId}`);
   formData.append("doesUserLikeThisPost", `${doesUserLikeThisPost}`);
 
   const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/post/like/${postId}`, {

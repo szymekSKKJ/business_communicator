@@ -15,3 +15,10 @@ export type user = {
     Opinions: number;
   };
 };
+
+export type userSmallData = {
+  id: string;
+  publicId: string;
+  profileImage: string;
+  lastActive: string;
+};

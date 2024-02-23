@@ -1,0 +1,99 @@
+.user {
+  --power: 1;
+
+  width: auto;
+  min-width: 400px;
+  height: auto;
+  min-height: 200px;
+  aspect-ratio: 2/1.125;
+  background-color: #434d56;
+  border-radius: 8px;
+  border: solid 4px #4d5a66;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px 0px 20px 4px #1b1e23;
+  flex-grow: 1;
+  animation: apearUser 333ms forwards;
+  transition: 500ms;
+  position: relative;
+
+  video {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    width: auto;
+    background-color: darkcyan;
+  }
+
+  @keyframes apearUser {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    65% {
+      transform: scale(0.95);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .outsideImageWrapper {
+    max-width: 150px;
+    width: auto;
+    height: 36%;
+    max-height: 150px;
+    aspect-ratio: 1/1;
+    position: relative;
+    display: flex;
+
+    .imageWrapper {
+      width: auto;
+      height: 100%;
+      border-radius: 100%;
+      aspect-ratio: 1/1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      z-index: 2;
+      margin: auto;
+      box-shadow: 0px 0px 20px 2px #4f5a64;
+
+      img {
+        width: auto;
+        height: 100%;
+      }
+    }
+
+    .voiceRange {
+      max-width: 150px;
+      width: auto;
+      height: 100%;
+      max-height: 150px;
+      aspect-ratio: 1/1;
+      background-color: #5a6672;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 100%;
+      z-index: 1;
+      scale: calc(var(--power) - 0.01);
+      transform-origin: left top;
+      transition: 100ms;
+    }
+  }
+}
+
+.user.notConnected {
+  display: none;
+}

@@ -7,15 +7,19 @@ import Button from "@/components/UI/Button/Button";
 import moment from "moment";
 import "moment/locale/pl";
 import { useEffect, useRef } from "react";
+import { Prompt, Montserrat } from "next/font/google";
+import { user } from "@/app/api/user/types";
+
+const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
+const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps {
-  userImageUrl: string;
-  publicId: string;
+  currentUser: user;
   onSend: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, textareaValue: string) => any;
   isOpen?: boolean;
 }
 
-const SendComment = ({ userImageUrl, publicId, onSend, isOpen = false }: componentProps) => {
+const SendComment = ({ onSend, currentUser, isOpen = false }: componentProps) => {
   const textareaElementRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -31,11 +35,11 @@ const SendComment = ({ userImageUrl, publicId, onSend, isOpen = false }: compone
     <div className={`${styles.sendComment} ${isOpen ? styles.open : ""}`}>
       <div className={`${styles.userData}`}>
         <div className={`${styles.wrapper1}`}>
-          <Image src={userImageUrl} alt="Zdjęcie autora postu" width={64} height={64}></Image>
+          <Image src={currentUser.profileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
         </div>
         <div className={`${styles.wrapper2}`}>
-          <p>{publicId}</p>
-          <p>{moment(new Date()).locale("pl").fromNow()}</p>
+          <p className={`${montserrat.className}`}>{currentUser.publicId}</p>
+          <p className={`${montserrat.className}`}>{moment(new Date()).locale("pl").fromNow()}</p>
         </div>
       </div>
       <Textarea refProp={textareaElementRef} id="textarea" placeholder="Napisz komentarz"></Textarea>

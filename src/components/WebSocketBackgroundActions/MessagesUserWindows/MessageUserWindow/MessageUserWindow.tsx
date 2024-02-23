@@ -4,13 +4,18 @@ import Image from "next/image";
 import styles from "./styles.module.scss";
 import moment from "moment";
 import "moment/locale/pl";
-import sendIcon from "../../../../public/chat_window/send.svg";
+import sendIcon from "../../../../../public/chat_window/send.svg";
+
 import { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef, useState } from "react";
-import { removeUserFromCurrentOpendMessagesUserWindows } from "../MessagesUserWindows";
 import { messageCreate } from "@/app/api/message/create/[userId]/route";
 import { user } from "@/app/api/user/types";
 import { messageGetSome } from "@/app/api/message/getSome/[userId]/route";
 import { Socket } from "socket.io-client";
+import { userGetLastActive } from "@/app/api/user/getLastActive/[id]/route";
+import { socketSignal } from "@/components/WebSocketBackgroundActions/WebSocketBackgroundActions";
+import { Noto_Sans } from "next/font/google";
+
+const noto_Sans = Noto_Sans({ weight: ["100", "300", "400", "500"], subsets: ["latin"] });
 
 const isEmpty = (str: string) => !str || /^\s*$/.test(str);
 
@@ -77,7 +82,6 @@ interface componentProps {
     image: string;
     queue: number;
   };
-  socket: Socket;
   newMessage: null | {
     id: string;
     content: string;
@@ -85,7 +89,7 @@ interface componentProps {
   };
 }
 
-const MessageUserWindow = ({ userData, currentUser, socket, newMessage }: componentProps) => {
+const MessageUserWindow = ({ userData, currentUser, newMessage }: componentProps) => {
   const [isClosing, setIsClosing] = useState(false);
   const [messages, setMessages] = useState<
     {
@@ -99,6 +103,7 @@ const MessageUserWindow = ({ userData, currentUser, socket, newMessage }: compon
   const [isGettingMessages, setIsGettingMessages] = useState(true);
   const [gotAllMessages, setGotAllMessages] = useState(false);
   const [scrollToBottom, setScrollToBottom] = useState(false);
+  const [lastActive, setLastActive] = useState(new Date(userData.lastActive));
 
   const textareaElementRef = useRef<null | HTMLSpanElement>(null);
   const messagesElementRef = useRef<null | HTMLDivElement>(null);
@@ -127,8 +132,33 @@ const MessageUserWindow = ({ userData, currentUser, socket, newMessage }: compon
     }
   }, [newMessage]);
 
+  const lastActiveIntervalRef = useRef<null | ReturnType<typeof setInterval>>(null);
+
+  useEffect(() => {
+    if (lastActiveIntervalRef.current) {
+      clearInterval(lastActiveIntervalRef.current);
+    }
+
+    if (isClosing === false) {
+      lastActiveIntervalRef.current = setInterval(async () => {
+        const lastActiveResponse = await userGetLastActive(userData.id);
+
+        if (lastActiveResponse.data) {
+          setLastActive(new Date(lastActiveResponse.data));
+        }
+      }, 1000 * 50 * 2);
+    }
+  }, [isClosing]);
+
   useEffect(() => {
     setIsClosing(false);
+
+    (async () => {
+      const lastActiveResponse = await userGetLastActive(userData.id);
+      if (lastActiveResponse.data) {
+        setLastActive(new Date(lastActiveResponse.data));
+      }
+    })();
   }, [userData.queue]);
 
   useEffect(() => {
@@ -188,8 +218,6 @@ const MessageUserWindow = ({ userData, currentUser, socket, newMessage }: compon
     }
   }, [scrollToBottom]);
 
-  const lastActive = new Date(userData.lastActive);
-
   moment.updateLocale("pl", {
     relativeTime: {
       s: "teraz",
@@ -197,6 +225,8 @@ const MessageUserWindow = ({ userData, currentUser, socket, newMessage }: compon
   });
 
   const someMinutesAgo = new Date().getTime() / 1000 - 120;
+
+  const isActiveNow = someMinutesAgo - lastActive.getTime() / 1000 <= 0;
 
   const formatedDate = moment(lastActive);
 
@@ -207,17 +237,35 @@ const MessageUserWindow = ({ userData, currentUser, socket, newMessage }: compon
   return (
     <div className={`${styles.messageUserWindow} ${isClosing ? styles.closing : ""}`}>
       <div className={`${styles.header}`}>
-        <div className={`${styles.userData}`}>
+        <div className={`${styles.userData} ${isActiveNow ? styles.active : ""}`}>
           <div className={`${styles.imageWrapper}`}>
             <Image src={userData.image} alt="Zdjęcie użytkownika czatu" width={36} height={36}></Image>
           </div>
           <div className={`${styles.dataWrapper}`}>
-            <p className={`${styles.username}`}>{userData.publicId}</p>
-            <p className={`${styles.lastActive}`}>{formatedDate.fromNow(someMinutesAgo - lastActive.getTime() / 1000 <= 120 ? true : false)}</p>
+            <p className={`${styles.username} ${noto_Sans.className}`}>{userData.publicId}</p>
+            <p className={`${styles.lastActive} ${noto_Sans.className}`}>{isActiveNow ? "Aktywny" : formatedDate.fromNow(false)}</p>
           </div>
         </div>
         <div className={`${styles.options}`}>
-          <button className={`${styles.call}`}>
+          <button
+            className={`${styles.call}`}
+            onClick={() => {
+              const generatedRoomId = crypto.randomUUID();
+
+              window.open(
+                `${process.env.NEXT_PUBLIC_URL}/call/${generatedRoomId}`,
+                "mozillaWindow",
+                `popup, width=${screen.width * 0.75}, height=${screen.height * 0.75}, left=${screen.width * 0.5 - (screen.width * 0.75) / 2}, top=${
+                  screen.height * 0.5 - (screen.height * 0.75) / 2
+                }`
+              );
+
+              socketSignal.value!.emit("callTo", {
+                roomId: generatedRoomId,
+                userId: currentUser.id,
+                callingToUserId: userData.id,
+              });
+            }}>
             <i className="fa-solid fa-phone"></i>
           </button>
           <button
@@ -257,13 +305,13 @@ const MessageUserWindow = ({ userData, currentUser, socket, newMessage }: compon
         </div>
       </div>
       <div className={`${styles.sender}`}>
-        <div className={`${styles.anotherInputWrapper}`}>
+        <div className={`${styles.anotherInputWrapper}`} tabIndex={0}>
           <div className={`${styles.inputWrapper}`}>
             <span
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
-                  sendMessage(textareaElementRef, setMessages, socket, currentUser, userData, setScrollToBottom);
+                  sendMessage(textareaElementRef, setMessages, socketSignal.value!, currentUser, userData, setScrollToBottom);
                 }
               }}
               contentEditable={true}
@@ -274,7 +322,7 @@ const MessageUserWindow = ({ userData, currentUser, socket, newMessage }: compon
         </div>
         <button
           onClick={() => {
-            sendMessage(textareaElementRef, setMessages, socket, currentUser, userData, setScrollToBottom);
+            sendMessage(textareaElementRef, setMessages, socketSignal.value!, currentUser, userData, setScrollToBottom);
           }}>
           <Image src={sendIcon} alt="Ikonka przycisku wyślij"></Image>
         </button>

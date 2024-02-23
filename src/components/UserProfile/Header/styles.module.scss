@@ -59,19 +59,20 @@
       align-items: flex-start;
 
       p.username {
-        font-weight: 600;
-        font-size: 28px;
+        font-weight: 500;
+        font-size: 32px;
+        line-height: 1;
       }
 
       p.id {
-        font-weight: 500;
-        font-size: 14px;
+        font-weight: 400;
+        font-size: 15px;
       }
 
       p.proffesion {
-        font-weight: 600;
-        font-size: 16px;
-        margin-top: 5px;
+        font-weight: 500;
+        font-size: 18px;
+        margin-top: 10px;
         margin-bottom: 20px;
         color: #4988ce;
       }

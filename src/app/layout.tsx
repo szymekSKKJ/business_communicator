@@ -3,10 +3,10 @@ import "./global.scss";
 import { Montserrat } from "next/font/google";
 import Notifications from "@/components/Notifications/Notifications";
 import Loader from "@/components/Loader/Loader";
-import MessagesUserWindows from "@/components/MessagesUserWindows/MessagesUserWindows";
 import { userGetByPublicId } from "./api/user/getByPublicId/[publicId]/route";
 import { authOptions, sessionUser } from "./api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
+import WebSocketBackgroundActions from "@/components/WebSocketBackgroundActions/WebSocketBackgroundActions";
 
 const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
@@ -30,8 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={montserrat.className}>
         <Notifications></Notifications>
         <Loader></Loader>
-        {userData?.data && <MessagesUserWindows currentUser={userData.data}></MessagesUserWindows>}
-
+        {userData?.data && <WebSocketBackgroundActions currentUser={userData.data}></WebSocketBackgroundActions>}
         {children}
       </body>
     </html>

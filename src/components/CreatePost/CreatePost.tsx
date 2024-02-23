@@ -12,16 +12,15 @@ import closeIcon from "../../../public/create_post/close.svg";
 import { postCreate } from "@/app/api/post/create/[userId]/route";
 import Loader from "./Loader/Loader";
 import { createNotification } from "../Notifications/Notifications";
+import { user } from "@/app/api/user/types";
 
 const isEmpty = (str: string) => !str || /^\s*$/.test(str);
 
 interface componentProps {
-  userImageUrl: string;
-  publicId: string;
-  userId: string;
+  currentUser: user;
 }
 
-const CreatePost = ({ userImageUrl, publicId, userId }: componentProps) => {
+const CreatePost = ({ currentUser }: componentProps) => {
   const [images, setImages] = useState<
     {
       id: string;
@@ -43,10 +42,10 @@ const CreatePost = ({ userImageUrl, publicId, userId }: componentProps) => {
       <div className={`${styles.sendComment}`}>
         <div className={`${styles.userData}`}>
           <div className={`${styles.wrapper1}`}>
-            <Image src={userImageUrl} alt="Zdjęcie autora postu" width={64} height={64}></Image>
+            <Image src={currentUser.profileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
           </div>
           <div className={`${styles.wrapper2}`}>
-            <p>{publicId}</p>
+            <p>{currentUser.publicId}</p>
             <p>{moment(new Date()).locale("pl").fromNow()}</p>
           </div>
         </div>
@@ -158,7 +157,7 @@ const CreatePost = ({ userImageUrl, publicId, userId }: componentProps) => {
                   };
                 });
 
-                const responseData = await postCreate(userId, textareaElement.innerText.replace(/\s+/g, " ").trim(), newImagesData);
+                const responseData = await postCreate(currentUser.id, textareaElement.innerText.replace(/\s+/g, " ").trim(), newImagesData);
 
                 setIsPostSending(false);
 

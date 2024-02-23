@@ -8,9 +8,9 @@ import { createResponse, response } from "@/app/api/responseTypes";
 
 export const POST = async (request: Request, { params: { userId } }: { params: { userId: string } }) => {
   try {
-    const currentUserSession = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions);
 
-    if (currentUserSession.user.id === userId) {
+    if (session) {
       const requestData = await request.formData();
 
       const storage = getStorage();
@@ -49,7 +49,7 @@ export const POST = async (request: Request, { params: { userId } }: { params: {
 };
 
 export const postCreate = async (
-  userId: string,
+  currentUserId: string,
   content: string,
   images: {
     id: string;
@@ -122,7 +122,7 @@ export const postCreate = async (
 
   formData.append(`imagesData`, `${JSON.stringify(newImagesData)}`);
 
-  const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/post/create/${userId}`, {
+  const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/post/create/${currentUserId}`, {
     method: "POST",
     body: formData,
   }).then(async (response) => await response.json())) as response<null>;

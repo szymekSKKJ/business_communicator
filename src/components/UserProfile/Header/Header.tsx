@@ -9,13 +9,13 @@ import { sessionUser } from "@/app/api/auth/[...nextauth]/route";
 import { userGiveFollow } from "@/app/api/user/giveFollow/[userId]/route";
 import { user } from "@/app/api/user/types";
 import { useState } from "react";
-import { addUserToCurrentOpendMessagesUserWindows } from "@/components/MessagesUserWindows/MessagesUserWindows";
+import { addUserToCurrentOpendMessagesUserWindows } from "@/components/WebSocketBackgroundActions/MessagesUserWindows/MessagesUserWindows";
 
 const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps {
   userData: user;
-  currentUser: sessionUser;
+  currentUser: user | null;
 }
 
 const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
@@ -34,10 +34,10 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
       </div>
       <div className={`${styles.wrapper}`}>
         <div className={`${styles.userData}`}>
-          <p className={`${styles.username}`}>{userData.name}</p>
-          <p className={`${styles.id}`}>@{userData.publicId}</p>
-          <p className={`${styles.proffesion}`}>{userData.description} </p>
-          {currentUser.id !== userData.id && (
+          <p className={`${styles.username} ${prompt.className}`}>{userData.name}</p>
+          <p className={`${styles.id} ${prompt.className}`}>@{userData.publicId}</p>
+          <p className={`${styles.proffesion} ${prompt.className}`}>{userData.description} </p>
+          {currentUser && currentUser.id !== userData.id && (
             <Button
               onClick={() => {
                 addUserToCurrentOpendMessagesUserWindows(userData.id, userData.publicId!, userData.lastActive, userData.profileImage);
@@ -56,15 +56,15 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
           </div>
           <div className={`${styles.wrapper1}`}>
             <div className={`${styles.wrapper}`}>
-              <p>{userData._count.followers}</p>
+              <p className={`${prompt.className}`}>{userData._count.followers}</p>
               <p>Obserwujących</p>
             </div>
             <div className={`${styles.wrapper}`}>
-              <p>{userData._count.following}</p>
+              <p className={`${prompt.className}`}>{userData._count.following}</p>
               <p>Obserwuje</p>
             </div>
           </div>
-          {currentUser.id !== userData.id && (
+          {currentUser && currentUser.id !== userData.id && (
             <Button
               className={`${userData.doesCurrentUserFollowThisUser ? styles.following : ""}`}
               onClick={async () => {

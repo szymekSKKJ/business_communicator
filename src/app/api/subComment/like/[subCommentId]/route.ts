@@ -9,13 +9,11 @@ export const POST = async (request: Request, { params: { subCommentId } }: { par
 
   const requestData = await request.formData();
 
-  const userId = requestData.get("userId") as string;
-
   try {
-    if (session.user.id === userId) {
+    if (session) {
       const user = (await prisma.user.findUnique({
         where: {
-          id: userId,
+          id: session.user.id,
         },
       })) as {
         id: string;
@@ -37,13 +35,13 @@ export const POST = async (request: Request, { params: { subCommentId } }: { par
               id: subCommentId,
               likedBy: {
                 some: {
-                  id: userId,
+                  id: session.user.id,
                 },
               },
             },
             data: {
               likedBy: {
-                disconnect: [{ id: userId }],
+                disconnect: [{ id: session.user.id }],
               },
             },
           });
@@ -55,7 +53,7 @@ export const POST = async (request: Request, { params: { subCommentId } }: { par
               id: subCommentId,
               likedBy: {
                 none: {
-                  id: userId,
+                  id: session.user.id,
                 },
               },
             },
@@ -78,10 +76,9 @@ export const POST = async (request: Request, { params: { subCommentId } }: { par
   }
 };
 
-export const subCommentLike = async (subCommentId: string, userId: string, doesUserLikeThisSubComment: boolean): Promise<response<null>> => {
+export const subCommentLike = async (subCommentId: string, doesUserLikeThisSubComment: boolean): Promise<response<null>> => {
   const formData = new FormData();
 
-  formData.append("userId", `${userId}`);
   formData.append("doesUserLikeThisSubComment", `${doesUserLikeThisSubComment}`);
 
   const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/subComment/like/${subCommentId}`, {

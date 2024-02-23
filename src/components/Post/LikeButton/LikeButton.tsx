@@ -7,16 +7,16 @@ import { Montserrat } from "next/font/google";
 const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  onClick?: MouseEventHandler<HTMLButtonElement>;
   currentLikes: number;
-  doesUserLikesThisPost: boolean;
+  doesCurrentUserLikesThat: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
   onClickCallback?: (likesData: { currentLikes: number; value: boolean }) => any;
 }
 
-const LikeButton = ({ onClick, children, currentLikes, doesUserLikesThisPost, onClickCallback, ...rest }: componentProps) => {
+const LikeButton = ({ onClick, children, currentLikes, doesCurrentUserLikesThat, onClickCallback, ...rest }: componentProps) => {
   const [likesData, setLikesData] = useState({
     currentLikes: currentLikes,
-    value: doesUserLikesThisPost,
+    value: doesCurrentUserLikesThat,
   });
   const [isAfterFirstClick, setIsAfterFirstCick] = useState(false);
 

@@ -37,18 +37,22 @@ export const authOptions = {
     async signIn({ account }: { account: any }) {
       return true;
     },
-    async session({ session, user }: any) {
-      const userData = await prisma.user.findUnique({
-        where: {
-          email: session.user.email,
-        },
-      });
+    async session({ session }: any) {
+      if (session) {
+        const userData = await prisma.user.findUnique({
+          where: {
+            email: session.user.email,
+          },
+        });
 
-      session.user.id = userData?.id;
-      session.user.publicId = userData?.publicId;
-      session.user.description = userData?.description;
-      session.user.name = userData?.name;
-      session.user.email = userData?.email;
+        if (userData) {
+          session.user.id = userData.id;
+          session.user.publicId = userData.publicId!;
+          session.user.description = userData.description!;
+          session.user.name = userData.name!;
+          session.user.email = userData.email!;
+        }
+      }
 
       return session;
     },

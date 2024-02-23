@@ -1,9 +1,9 @@
 "use client";
 import { HTMLAttributes, MutableRefObject, useEffect } from "react";
 import styles from "./styles.module.scss";
-import { Montserrat } from "next/font/google";
+import { Prompt } from "next/font/google";
 
-const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
+const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps extends HTMLAttributes<HTMLSpanElement> {
   placeholder: string;
@@ -20,7 +20,7 @@ const Textarea = ({ placeholder, refProp, ...rest }: componentProps) => {
         }
       }}>
       <span
-        className={`${montserrat.className}`}
+        className={`${prompt.className}`}
         contentEditable={true}
         data-placeholder={placeholder}
         role="textarea"

@@ -15,19 +15,21 @@ import { subCommentGetSome } from "@/app/api/subComment/getSome/[commentId]/rout
 import SubComment from "./SubComment/SubComment";
 import SendComment from "../SendComment/SendComment";
 import { subComment } from "@/app/api/subComment/types";
+import { Prompt } from "next/font/google";
+import { user } from "@/app/api/user/types";
+
+const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps {
-  userImageUrl: string;
-  publicId: string;
-  userId: string;
   data: comment;
   setAreCommentsOpen: Dispatch<SetStateAction<boolean>>;
   areCommentsOpen: boolean;
+  currentUser: user | null;
 }
 
-const Comment = ({ data, userImageUrl, publicId, userId, setAreCommentsOpen, areCommentsOpen }: componentProps) => {
+const Comment = ({ data, currentUser, setAreCommentsOpen, areCommentsOpen }: componentProps) => {
   const [areSubCommentsOpen, setAreSubCommentsOpen] = useState(false);
   const [subComments, setSubComments] = useState<subComment[]>([]);
   const [areSubCommentsLoading, setAreSubCommentsLoading] = useState(false);
@@ -41,7 +43,7 @@ const Comment = ({ data, userImageUrl, publicId, userId, setAreCommentsOpen, are
   useEffect(() => {
     if (subComments.length === 0 && areSubCommentsOpen) {
       (async () => {
-        const response = await subCommentGetSome(data.id, userId);
+        const response = await subCommentGetSome(data.id);
 
         if (response.error === null) {
           setSubComments(response.data!);
@@ -63,29 +65,29 @@ const Comment = ({ data, userImageUrl, publicId, userId, setAreCommentsOpen, are
       <div className={`${styles.userData}`}>
         <div className={`${styles.wrapper1}`}>
           <Link href={`/${data.author.publicId}`}>
-            <Image src={userImageUrl} alt="Zdjęcie autora postu" width={64} height={64}></Image>
+            <Image src={data.author.profileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
           </Link>
         </div>
         <div className={`${styles.wrapper2}`}>
           <Link href={`/${data.author.publicId}`}>
-            <p>{publicId}</p>
+            <p className={`${montserrat.className}`}>{data.author.publicId}</p>
           </Link>
-          <p>
+          <p className={`${montserrat.className}`}>
             {formatedDate.fromNow()} o {date.toLocaleTimeString("pl-PL", { hour: "numeric", minute: "numeric" })}
           </p>
         </div>
       </div>
       <div className={`${styles.content}`}>
-        <p>{data.content}</p>
+        <p className={`${prompt.className}`}>{data.content}</p>
       </div>
       <div className={`${styles.options}`}>
         <LikeButton
           onClickCallback={async (likesData) => {
             const { value } = likesData;
-            await commentLike(data.id, userId, value);
+            await commentLike(data.id, value);
           }}
           currentLikes={data._count.likedBy}
-          doesUserLikesThisPost={data.doesUserLikesThisComment}></LikeButton>
+          doesCurrentUserLikesThat={data.doesCurrentUserLikesThisComment}></LikeButton>
         <button
           className={`${montserrat.className}`}
           onClick={() => {
@@ -100,13 +102,14 @@ const Comment = ({ data, userImageUrl, publicId, userId, setAreCommentsOpen, are
         </button>
       </div>
       <div className={`${styles.subComments} ${areSubCommentsOpen ? styles.open : ""}`}>
-        <SendComment
-          publicId={publicId}
-          userImageUrl={userImageUrl}
-          isOpen={areSubCommentsOpen}
-          onSend={async (_event, textareaValue) => {
-            await subCommentCreate(data.id, userId, textareaValue.replace(/\s+/g, " ").trim());
-          }}></SendComment>
+        {currentUser && (
+          <SendComment
+            currentUser={currentUser}
+            isOpen={areSubCommentsOpen}
+            onSend={async (_event, textareaValue) => {
+              await subCommentCreate(data.id, textareaValue.replace(/\s+/g, " ").trim());
+            }}></SendComment>
+        )}
 
         {areSubCommentsLoading ? (
           <>
@@ -117,7 +120,7 @@ const Comment = ({ data, userImageUrl, publicId, userId, setAreCommentsOpen, are
         ) : (
           subComments.map((subCommentData) => {
             const { id } = subCommentData;
-            return <SubComment key={id} data={subCommentData} userId={userId}></SubComment>;
+            return <SubComment key={id} data={subCommentData} currentUser={currentUser}></SubComment>;
           })
         )}
 

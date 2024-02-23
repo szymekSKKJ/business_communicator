@@ -2,6 +2,8 @@ import prisma from "@/prisma";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import "../../../../../firebaseInitialization.ts";
 import { createResponse, response } from "@/app/api/responseTypes";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../auth/[...nextauth]/route";
 
 export type comment = {
   content: string;
@@ -11,12 +13,12 @@ export type comment = {
     likedBy: number;
   };
   createdAt: Date;
-  doesUserLikesThisComment: boolean;
+  doesCurrentUserLikesThisComment: boolean;
   author: {
     id: string;
-    name: string | null;
-    publicId: string | null;
-    image: string;
+    name: string;
+    publicId: string;
+    profileImage: string;
   };
 };
 
@@ -55,6 +57,10 @@ export const GET = async (request: Request, { params: { postId } }: { params: { 
 
     const storage = getStorage();
 
+    const session = await getServerSession(authOptions);
+
+    const currentUserId = session === null ? null : session.user.id;
+
     await Promise.all(
       comments.map(async (commentData) => {
         const {
@@ -62,20 +68,25 @@ export const GET = async (request: Request, { params: { postId } }: { params: { 
           id: commentId,
         } = commentData;
 
-        const doesUserLikesThisComment = await prisma.postComment.findUnique({
-          where: {
-            id: commentId,
-            likedBy: {
-              some: {
-                id: url.searchParams.get("userId") as string,
-              },
-            },
-          },
-        });
+        const doesCurrentUserLikesThisComment =
+          currentUserId === null
+            ? false
+            : (await prisma.postComment.findUnique({
+                where: {
+                  id: commentId,
+                  likedBy: {
+                    some: {
+                      id: currentUserId,
+                    },
+                  },
+                },
+              })) === null
+            ? false
+            : true;
 
         const urlImage = await getDownloadURL(ref(storage, `users/${authorId}/profileImage.webp`));
-        commentData.author.image = urlImage;
-        commentData.doesUserLikesThisComment = doesUserLikesThisComment === null ? false : true;
+        commentData.author.profileImage = urlImage;
+        commentData.doesCurrentUserLikesThisComment = doesCurrentUserLikesThisComment;
       })
     );
 
@@ -86,8 +97,8 @@ export const GET = async (request: Request, { params: { postId } }: { params: { 
   }
 };
 
-export const commentGetSome = async (postId: string, userId: string, skip: string = "0", take: string = "20"): Promise<response<comment[]>> => {
-  const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/comment/getSome/${postId}?skip=${skip}&take=${take}&userId=${userId}`, {
+export const commentGetSome = async (postId: string, skip: string = "0", take: string = "20"): Promise<response<comment[]>> => {
+  const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/comment/getSome/${postId}?skip=${skip}&take=${take}`, {
     next: {
       revalidate: 10,
     },

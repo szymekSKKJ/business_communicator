@@ -6,10 +6,9 @@ import shareIcon from "../../../public/post/share.svg";
 import Image from "next/image";
 import moment from "moment";
 import "moment/locale/pl";
-import { Montserrat } from "next/font/google";
+import { Montserrat, Prompt } from "next/font/google";
 import Comment, { SkeletonLoadingComment } from "./Comment/Comment";
 import { useLayoutEffect, useState } from "react";
-
 import { postLike } from "@/app/api/post/like/[postId]/route";
 import { comment, commentGetSome } from "@/app/api/comment/getSome/[postId]/route";
 import { commentCreate } from "@/app/api/comment/create/[postId]/route";
@@ -17,17 +16,17 @@ import LikeButton from "./LikeButton/LikeButton";
 import Link from "next/link";
 import SendComment from "./SendComment/SendComment";
 import { post } from "@/app/api/post/types";
+import { user } from "@/app/api/user/types";
 
+const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps {
-  userImageUrl: string;
-  publicId: string;
   postData: post;
-  userId: string;
+  currentUser: user | null;
 }
 
-const Post = ({ userImageUrl, publicId, postData, userId }: componentProps) => {
+const Post = ({ postData, currentUser }: componentProps) => {
   const [areCommentsOpen, setAreCommentsOpen] = useState(false);
   const [comments, setComments] = useState<comment[]>([]);
   const [areCommentsLoading, setAreCommentsLoading] = useState(false);
@@ -41,7 +40,8 @@ const Post = ({ userImageUrl, publicId, postData, userId }: componentProps) => {
   useLayoutEffect(() => {
     if (comments.length === 0 && areCommentsOpen) {
       (async () => {
-        const response = await commentGetSome(postData.id, userId);
+        const response = await commentGetSome(postData.id);
+
         if (response.error === null) {
           setComments(response.data!);
         }
@@ -58,19 +58,19 @@ const Post = ({ userImageUrl, publicId, postData, userId }: componentProps) => {
       <div className={`${styles.userData}`}>
         <div className={`${styles.wrapper1}`}>
           <Link href={`/${postData.author.publicId}`}>
-            <Image src={userImageUrl} alt="Zdjęcie autora postu" width={64} height={64}></Image>
+            <Image src={postData.author.profileImage} alt="Zdjęcie autora postu" width={64} height={64}></Image>
           </Link>
         </div>
         <div className={`${styles.wrapper2}`}>
           <Link href={`/${postData.author.publicId}`}>
-            <p>{publicId}</p>
+            <p>{postData.author.publicId}</p>
           </Link>
           <p>
             {formatedDate.fromNow()} o {date.toLocaleTimeString("pl-PL", { hour: "numeric", minute: "numeric" })}
           </p>
         </div>
       </div>
-      <div className={`${styles.content}`}>
+      <div className={`${styles.content} ${prompt.className}`}>
         <p>{postData.content}</p>
         {postData.imagesData.length !== 0 && (
           <div className={`${styles.images}`}>
@@ -96,10 +96,10 @@ const Post = ({ userImageUrl, publicId, postData, userId }: componentProps) => {
         <div className={`${styles.options}`}>
           <LikeButton
             currentLikes={postData._count.likedBy}
-            doesUserLikesThisPost={postData.doesUserLikesThisPost}
+            doesCurrentUserLikesThat={postData.doesCurrentUserLikesThisPost}
             onClickCallback={async (likesData) => {
               const { value } = likesData;
-              await postLike(postData.id, userId, value);
+              currentUser && (await postLike(postData.id, value));
             }}></LikeButton>
 
           <button
@@ -117,18 +117,17 @@ const Post = ({ userImageUrl, publicId, postData, userId }: componentProps) => {
           </button>
         </div>
         <div className={`${styles.comments} ${areCommentsOpen ? styles.open : ""}`}>
-          <SendComment
-            publicId={publicId}
-            userImageUrl={userImageUrl}
-            isOpen={areCommentsOpen}
-            onSend={async (_event, textareaValue) => {
-              await commentCreate(postData.id, userId, textareaValue.replace(/\s+/g, " ").trim());
-            }}></SendComment>
+          {currentUser && (
+            <SendComment
+              currentUser={currentUser}
+              isOpen={areCommentsOpen}
+              onSend={async (_event, textareaValue) => {
+                await commentCreate(postData.id, textareaValue.replace(/\s+/g, " ").trim());
+              }}></SendComment>
+          )}
           {postData.mostLikedComment && (
             <Comment
-              userImageUrl={userImageUrl}
-              publicId={publicId}
-              userId={userId}
+              currentUser={currentUser}
               key={postData.mostLikedComment.id}
               setAreCommentsOpen={setAreCommentsOpen}
               areCommentsOpen={areCommentsOpen}
@@ -146,11 +145,9 @@ const Post = ({ userImageUrl, publicId, postData, userId }: componentProps) => {
               if (postData.mostLikedComment && commentData.id !== postData.mostLikedComment.id) {
                 return (
                   <Comment
+                    currentUser={currentUser}
                     key={commentData.id}
                     data={commentData}
-                    userImageUrl={userImageUrl}
-                    publicId={publicId}
-                    userId={userId}
                     areCommentsOpen={areCommentsOpen}
                     setAreCommentsOpen={setAreCommentsOpen}></Comment>
                 );

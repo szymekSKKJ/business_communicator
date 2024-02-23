@@ -7,16 +7,16 @@ export type post = {
   imagesData: { id: string; url: string; order: number }[];
   author: {
     id: string;
-    name: string | null;
-    email: string | null;
+    name: string;
+    email: string;
     emailVerified: Date | null;
-    image: string | null;
-    publicId: string | null;
-    description: string | null;
-    postSubCommentReplyId: string | null;
+    profileImage: string;
+    publicId: string;
+    description: string;
+    postSubCommentReplyId: string;
   };
-  doesUserLikesThisPost: boolean;
-  mostLikedComment: comment | null;
+  doesCurrentUserLikesThisPost: boolean;
+  mostLikedComment: comment;
   _count: {
     likedBy: number;
     comments: number;

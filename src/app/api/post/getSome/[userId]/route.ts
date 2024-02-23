@@ -4,12 +4,16 @@ import "../../../../../firebaseInitialization";
 import { comment } from "@/app/api/comment/getSome/[postId]/route";
 import { createResponse, response } from "@/app/api/responseTypes";
 import { post } from "../../types";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { user } from "@/app/api/user/types";
 
 export const GET = async (request: Request, { params: { userId } }: { params: { userId: string } }) => {
   try {
     const url = new URL(request.url);
 
-    const posts = (await prisma.post.findMany({
+    // #SKKJ do sprawdzenia
+    const posts = await prisma.post.findMany({
       skip: parseInt(url.searchParams.get("skip") as string),
       take: parseInt(url.searchParams.get("take") as string),
       where: {
@@ -32,7 +36,8 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
           },
         },
       },
-    })) as post[];
+    });
+
     const storage = getStorage();
 
     await Promise.all(
@@ -68,16 +73,25 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
           },
         })) as comment | null;
 
-        const doesUserLikesThisPost = await prisma.post.findUnique({
-          where: {
-            id: postData.id,
-            likedBy: {
-              some: {
-                id: userId,
-              },
-            },
-          },
-        });
+        const session = await getServerSession(authOptions);
+
+        const currentUserId = session === null ? null : session.user.id;
+
+        const doesCurrentUserLikesThisPost =
+          currentUserId === null
+            ? false
+            : (await prisma.post.findUnique({
+                where: {
+                  id: postData.id,
+                  likedBy: {
+                    some: {
+                      id: currentUserId,
+                    },
+                  },
+                },
+              })) === null
+            ? false
+            : true;
 
         await Promise.all(
           parsedImagesData.map(async (imageData: { id: string; order: number; url?: string }) => {
@@ -91,29 +105,32 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
         if (mostLikedComment) {
           const urlImage = await getDownloadURL(ref(storage, `users/${userId}/profileImage.webp`));
 
-          mostLikedComment.author.image = urlImage;
+          mostLikedComment.author.profileImage = urlImage;
 
-          const doesUserLikesThisComment = (await prisma.postComment.findUnique({
-            where: {
-              id: mostLikedComment.id,
-              likedBy: {
-                some: {
-                  id: userId,
-                },
-              },
-            },
-          })) as comment | null;
-
-          mostLikedComment.doesUserLikesThisComment = doesUserLikesThisComment === null ? false : true;
+          const doesCurrentUserLikesThisComment =
+            currentUserId === null
+              ? false
+              : (await prisma.postComment.findUnique({
+                  where: {
+                    id: mostLikedComment.id,
+                    likedBy: {
+                      some: {
+                        id: userId,
+                      },
+                    },
+                  },
+                })) === null
+              ? false
+              : true;
+          doesCurrentUserLikesThisComment;
+          mostLikedComment.doesCurrentUserLikesThisComment = doesCurrentUserLikesThisComment;
 
           postData.mostLikedComment = mostLikedComment;
         }
 
-        postData.doesUserLikesThisPost = false;
-
-        if (doesUserLikesThisPost) {
-          postData.doesUserLikesThisPost = true;
-        }
+        const postAuthorImage = await getDownloadURL(ref(storage, `users/${postData.author.id}/profileImage.webp`));
+        postData.author.profileImage = postAuthorImage;
+        postData.doesCurrentUserLikesThisPost = doesCurrentUserLikesThisPost;
       })
     );
     return createResponse(200, null, posts);

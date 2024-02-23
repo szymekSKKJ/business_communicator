@@ -5,9 +5,11 @@ import MessageUserWindow from "./MessageUserWindow/MessageUserWindow";
 import styles from "./styles.module.scss";
 import { signal } from "@preact/signals-react";
 import { useEffect, useState } from "react";
-import { Socket, io } from "socket.io-client";
+
 import { user } from "@/app/api/user/types";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
+import { userUpdate } from "@/app/api/user/update/[id]/route";
+import { socketSignal } from "../WebSocketBackgroundActions";
 
 const currentOpenedMessagesUserWindows = signal<
   {
@@ -77,7 +79,6 @@ interface componentsProps {
 }
 
 const MessagesUserWindows = ({ currentUser }: componentsProps) => {
-  const [socket, setSocket] = useState<null | Socket>(null);
   const [lastReceivedMessage, setLastReceivedMessage] = useState<{
     id: string;
     content: string;
@@ -91,21 +92,21 @@ const MessagesUserWindows = ({ currentUser }: componentsProps) => {
   useSignals();
 
   useEffect(() => {
-    const socket = io(`${process.env.NEXT_PUBLIC_WS_URL}`);
+    (async () => {
+      await userUpdate(currentUser.id);
+    })();
 
-    setSocket(socket);
+    const interval = setInterval(async () => {
+      await userUpdate(currentUser.id);
+    }, 1000 * 60 * 2);
 
-    socket.on("connect", () => {
-      socket.emit("getUserId", { ioId: socket.id, userId: currentUser.id });
-    });
-
-    socket.on("receivingMessage", (message) => {
+    socketSignal.value!.on("receivingMessage", (message) => {
       setLastReceivedMessage(message);
       addUserToCurrentOpendMessagesUserWindows(message.toUserId, message.toUserPublicId, new Date(), null);
     });
 
     return () => {
-      socket.disconnect();
+      clearInterval(interval);
     };
   }, []);
 
@@ -113,13 +114,12 @@ const MessagesUserWindows = ({ currentUser }: componentsProps) => {
 
   return (
     <div className={`${styles.messagesUserWindows}`}>
-      {socket &&
+      {socketSignal.value &&
         SortedCurrentOpenedMessagesUserWindows.map((userData) => {
           const { publicId } = userData;
 
           return (
             <MessageUserWindow
-              socket={socket}
               newMessage={lastReceivedMessage.toUserId === userData.id ? lastReceivedMessage : null}
               key={publicId}
               currentUser={currentUser}

@@ -12,14 +12,22 @@ export const POST = async (request: Request, { params: { id } }: { params: { id:
     if (currentUserSession.user.id === id) {
       const requestData = await request.formData();
 
+      const currentUserData = await prisma.user.findUnique({
+        where: {
+          id: id,
+        },
+      });
+
       const preparedDataToSave: {
         description: null | string;
         publicId: null | string;
         name: null | string;
+        lastActive: Date;
       } = {
-        description: null,
-        publicId: null,
-        name: null,
+        description: currentUserData?.description ? currentUserData.description : null,
+        publicId: currentUserData?.publicId ? currentUserData.publicId : null,
+        name: currentUserData?.name ? currentUserData.name : null,
+        lastActive: new Date(),
       };
 
       const storage = getStorage();

@@ -1,7 +1,5 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/prisma";
-import { Prisma } from "@prisma/client";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { getServerSession } from "next-auth";
 import "../../../../../firebaseInitialization";
 import { createResponse, response } from "@/app/api/responseTypes";
@@ -9,9 +7,9 @@ import { message } from "../../types";
 
 export const POST = async (request: Request, { params: { userId } }: { params: { userId: string } }) => {
   try {
-    const currentUserSession = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions);
 
-    if (currentUserSession.user.id === userId) {
+    if (session) {
       const requestData = await request.formData();
 
       const content = requestData.get("content") as string;
