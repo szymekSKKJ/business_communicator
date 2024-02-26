@@ -83,7 +83,7 @@ var logicForMessages = function (socket) {
 };
 var logicForCalling = function (socket) {
     socket.on("setLocalDescription", function (data) { return __awaiter(void 0, void 0, void 0, function () {
-        var localDescription, toUserId, fromUserId, ioId, roomId, callingClientTo, callingClientFrom, counterClientFrom_1, counterClientTo_1;
+        var localDescription, toUserId, fromUserId, ioId, roomId, callingClientTo, callingClientFrom, candidatesFrom_1, candidatesTo_1;
         return __generator(this, function (_a) {
             localDescription = data.localDescription, toUserId = data.toUserId, fromUserId = data.fromUserId, ioId = data.ioId, roomId = data.roomId;
             callingClientTo = callingClients.get(toUserId);
@@ -93,6 +93,7 @@ var logicForCalling = function (socket) {
                     callingClients.set(fromUserId, {
                         ioId: ioId,
                         candidates: callingClientFrom.candidates,
+                        isConnected: false,
                         localDescription: localDescription,
                         toUserId: toUserId,
                         roomId: roomId,
@@ -102,6 +103,7 @@ var logicForCalling = function (socket) {
                     callingClients.set(fromUserId, {
                         ioId: ioId,
                         candidates: [],
+                        isConnected: false,
                         localDescription: localDescription,
                         toUserId: toUserId,
                         roomId: roomId,
@@ -109,7 +111,6 @@ var logicForCalling = function (socket) {
                 }
             }
             else if (callingClientTo.localDescription) {
-                console.log("before");
                 if (callingClientTo.localDescription.type === "offer" && localDescription.type === "offer") {
                     io.to(ioId).emit("setRemoteDescription", {
                         remoteDescription: callingClientTo.localDescription,
@@ -122,27 +123,24 @@ var logicForCalling = function (socket) {
                         fromUserId: fromUserId,
                     });
                     if (callingClientFrom && callingClientTo) {
-                        console.log("after");
-                        counterClientFrom_1 = 0;
-                        callingClientFrom.candidates.forEach(function (candidate, index, array) {
+                        candidatesFrom_1 = __spreadArray([], callingClientFrom.candidates, true);
+                        callingClientFrom.candidates.forEach(function (candidate, index) {
                             io.to(callingClientTo.ioId).emit("setCandidate", {
                                 candidate: candidate,
                             });
-                            if (counterClientFrom_1 === array.length - 1) {
-                                //callingClients.delete(fromUserId);
-                            }
-                            counterClientFrom_1++;
+                            candidatesFrom_1.splice(0, 1);
                         });
-                        counterClientTo_1 = 0;
-                        callingClientTo.candidates.forEach(function (candidate, index, array) {
+                        callingClientFrom.candidates = candidatesFrom_1;
+                        callingClients.set(fromUserId, callingClientFrom);
+                        candidatesTo_1 = __spreadArray([], callingClientTo.candidates, true);
+                        callingClientTo.candidates.forEach(function (candidate) {
                             io.to(callingClientFrom.ioId).emit("setCandidate", {
                                 candidate: candidate,
                             });
-                            if (counterClientFrom_1 === array.length - 1) {
-                                //callingClients.delete(fromUserId);
-                            }
-                            counterClientTo_1++;
+                            candidatesTo_1.splice(0, 1);
                         });
+                        callingClientTo.candidates = candidatesTo_1;
+                        callingClients.set(toUserId, callingClientTo);
                     }
                 }
             }
@@ -158,6 +156,7 @@ var logicForCalling = function (socket) {
                     ioId: ioId,
                     candidates: [candidate],
                     localDescription: undefined,
+                    isConnected: false,
                     toUserId: toUserId,
                     roomId: roomId,
                 });
@@ -167,6 +166,7 @@ var logicForCalling = function (socket) {
                     ioId: ioId,
                     candidates: __spreadArray([candidate], callingClientFrom.candidates, true),
                     localDescription: callingClientFrom.localDescription,
+                    isConnected: false,
                     toUserId: toUserId,
                     roomId: roomId,
                 });
@@ -175,16 +175,19 @@ var logicForCalling = function (socket) {
         else {
             var callingClientTo_1 = callingClients.get(toUserId);
             if (callingClientFrom && callingClientTo_1) {
-                var counterClientFrom_2 = 0;
-                callingClientFrom.candidates.forEach(function (candidate, index, array) {
+                var candidates_1 = __spreadArray([], callingClientFrom.candidates, true);
+                callingClientFrom.candidates.forEach(function (candidate) {
                     io.to(callingClientTo_1.ioId).emit("setCandidate", {
                         candidate: candidate,
                     });
-                    if (counterClientFrom_2 === array.length - 1) {
-                        //callingClients.delete(fromUserId);
-                    }
-                    counterClientFrom_2++;
+                    candidates_1.splice(0, 1);
                 });
+                callingClientFrom.candidates = candidates_1;
+                callingClients.set(fromUserId, __assign(__assign({}, callingClientFrom), { isConnected: true }));
+                if (callingClientTo_1 && callingClientTo_1.isConnected) {
+                    callingClients.delete(fromUserId);
+                    callingClients.delete(toUserId);
+                }
             }
         }
     });
@@ -195,11 +198,13 @@ var addToActive = function (socket) {
         var isAlreadyConnected = activeUsers.get(userId);
         if (isAlreadyConnected) {
             activeUsers.set(userId, {
+                callRooms: [],
                 conectedInstance: __spreadArray(__spreadArray([], isAlreadyConnected.conectedInstance, true), [socket.id], false),
             });
         }
         else {
             activeUsers.set(userId, {
+                callRooms: [],
                 conectedInstance: [socket.id],
             });
         }
@@ -212,19 +217,19 @@ var addToActive = function (socket) {
             return data.conectedInstance.includes(socket.id);
         });
         if (foundDisconnectedUser) {
-            var foundUserInCallingClients = callingClients.get(foundDisconnectedUser.userId);
-            if (foundUserInCallingClients) {
-                callingClients.delete(foundDisconnectedUser.userId);
-                var foundRoomBefore = callRooms.get(foundUserInCallingClients.roomId);
+            var isThisSocketConnectedToCallRoom = foundDisconnectedUser.callRooms.find(function (data) { return data.ioId === socket.id; });
+            if (isThisSocketConnectedToCallRoom) {
+                var foundCallRoom = isThisSocketConnectedToCallRoom;
+                var foundRoomBefore = callRooms.get(foundCallRoom.roomId);
                 var userIndexInCallRoom = foundRoomBefore.findIndex(function (data) { return data.userId === foundDisconnectedUser.userId; });
                 foundRoomBefore.splice(userIndexInCallRoom, 1);
-                callRooms.set(foundUserInCallingClients.roomId, foundRoomBefore);
-                var foundRoomAfter = callRooms.get(foundUserInCallingClients.roomId);
+                callRooms.set(foundCallRoom.roomId, foundRoomBefore);
+                var foundRoomAfter = callRooms.get(foundCallRoom.roomId);
                 foundRoomAfter.forEach(function (data) {
-                    io.to(data.ioId).emit("userDisconected", { userId: foundDisconnectedUser.userId });
+                    io.to(data.ioId).emit("userDisconectedFromRoom", { userId: foundDisconnectedUser.userId });
                 });
                 if (foundRoomAfter.length === 0) {
-                    callRooms.delete(foundUserInCallingClients.roomId);
+                    callRooms.delete(foundCallRoom.roomId);
                 }
             }
             if (foundDisconnectedUser.conectedInstance.length === 1) {
@@ -234,6 +239,7 @@ var addToActive = function (socket) {
                 var indexOfInstanceToRemove = foundDisconnectedUser.conectedInstance.findIndex(function (ioId) { return ioId === socket.id; });
                 foundDisconnectedUser.conectedInstance.splice(indexOfInstanceToRemove, 1);
                 activeUsers.set(foundDisconnectedUser.userId, {
+                    callRooms: [],
                     conectedInstance: foundDisconnectedUser.conectedInstance,
                 });
             }
@@ -286,6 +292,15 @@ var initializeCall = function (socket) {
                     userId: data.userId,
                 });
             });
+            var activeUser = activeUsers.get(userId);
+            if (activeUser) {
+                activeUsers.set(userId, __assign(__assign({}, activeUser), { callRooms: __spreadArray(__spreadArray([], activeUser.callRooms, true), [
+                        {
+                            ioId: socket.id,
+                            roomId: roomId,
+                        },
+                    ], false) }));
+            }
         }
         else {
             // #SKKJ to znaczy, że coś się zjebało z połączeniem i trzeba ponowić (refresh u clienta czy coś)

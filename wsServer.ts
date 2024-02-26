@@ -12,6 +12,10 @@ const io = new Server(httpServer, {
 const activeUsers = new Map<
   string,
   {
+    callRooms: {
+      roomId: string;
+      ioId: string;
+    }[];
     conectedInstance: string[];
   }
 >();
@@ -21,6 +25,7 @@ const callingClients = new Map<
   {
     ioId: string;
     roomId: string;
+    isConnected: boolean;
     candidates: RTCIceCandidate[];
     localDescription?: RTCSessionDescription;
     toUserId?: string;
@@ -38,7 +43,6 @@ const callRooms = new Map<
 const logicForMessages = (socket: Socket<any>) => {
   socket.on("sendingMessage", (message: { fromUserId: string; toUserId: string; content: string; messageId: string; fromUserPublicId: string }) => {
     const { toUserId, content, fromUserId, messageId, fromUserPublicId } = message;
-
     const foundClient = activeUsers.get(toUserId);
 
     foundClient?.conectedInstance.forEach((ioId) => {
@@ -57,7 +61,6 @@ const logicForCalling = (socket: Socket<any>) => {
     "setLocalDescription",
     async (data: { localDescription: RTCSessionDescription; toUserId: string; fromUserId: string; ioId: string; roomId: string }) => {
       const { localDescription, toUserId, fromUserId, ioId, roomId } = data;
-
       const callingClientTo = callingClients.get(toUserId);
       const callingClientFrom = callingClients.get(fromUserId);
 
@@ -66,6 +69,7 @@ const logicForCalling = (socket: Socket<any>) => {
           callingClients.set(fromUserId, {
             ioId: ioId,
             candidates: callingClientFrom.candidates,
+            isConnected: false,
             localDescription: localDescription,
             toUserId: toUserId,
             roomId: roomId,
@@ -74,14 +78,13 @@ const logicForCalling = (socket: Socket<any>) => {
           callingClients.set(fromUserId, {
             ioId: ioId,
             candidates: [],
+            isConnected: false,
             localDescription: localDescription,
             toUserId: toUserId,
             roomId: roomId,
           });
         }
       } else if (callingClientTo.localDescription) {
-        console.log("before");
-
         if (callingClientTo.localDescription.type === "offer" && localDescription.type === "offer") {
           io.to(ioId).emit("setRemoteDescription", {
             remoteDescription: callingClientTo.localDescription,
@@ -94,32 +97,33 @@ const logicForCalling = (socket: Socket<any>) => {
           });
 
           if (callingClientFrom && callingClientTo) {
-            console.log("after");
-            let counterClientFrom = 0;
+            const candidatesFrom = [...callingClientFrom.candidates];
 
-            callingClientFrom.candidates.forEach((candidate, index, array) => {
+            callingClientFrom.candidates.forEach((candidate, index) => {
               io.to(callingClientTo.ioId).emit("setCandidate", {
                 candidate: candidate,
               });
 
-              if (counterClientFrom === array.length - 1) {
-                //callingClients.delete(fromUserId);
-              }
-              counterClientFrom++;
+              candidatesFrom.splice(0, 1);
             });
 
-            let counterClientTo = 0;
+            callingClientFrom.candidates = candidatesFrom;
 
-            callingClientTo.candidates.forEach((candidate, index, array) => {
+            callingClients.set(fromUserId, callingClientFrom);
+
+            const candidatesTo = [...callingClientTo.candidates];
+
+            callingClientTo.candidates.forEach((candidate) => {
               io.to(callingClientFrom.ioId).emit("setCandidate", {
                 candidate: candidate,
               });
 
-              if (counterClientFrom === array.length - 1) {
-                //callingClients.delete(fromUserId);
-              }
-              counterClientTo++;
+              candidatesTo.splice(0, 1);
             });
+
+            callingClientTo.candidates = candidatesTo;
+
+            callingClients.set(toUserId, callingClientTo);
           }
         }
       }
@@ -136,6 +140,7 @@ const logicForCalling = (socket: Socket<any>) => {
           ioId: ioId,
           candidates: [candidate],
           localDescription: undefined,
+          isConnected: false,
           toUserId: toUserId,
           roomId: roomId,
         });
@@ -144,6 +149,7 @@ const logicForCalling = (socket: Socket<any>) => {
           ioId: ioId,
           candidates: [candidate, ...callingClientFrom.candidates],
           localDescription: callingClientFrom.localDescription,
+          isConnected: false,
           toUserId: toUserId,
           roomId: roomId,
         });
@@ -152,18 +158,26 @@ const logicForCalling = (socket: Socket<any>) => {
       const callingClientTo = callingClients.get(toUserId);
 
       if (callingClientFrom && callingClientTo) {
-        let counterClientFrom = 0;
+        const candidates = [...callingClientFrom.candidates];
 
-        callingClientFrom.candidates.forEach((candidate, index, array) => {
+        callingClientFrom.candidates.forEach((candidate) => {
           io.to(callingClientTo.ioId).emit("setCandidate", {
             candidate: candidate,
           });
 
-          if (counterClientFrom === array.length - 1) {
-            //callingClients.delete(fromUserId);
-          }
-          counterClientFrom++;
+          candidates.splice(0, 1);
         });
+
+        callingClientFrom.candidates = candidates;
+        callingClients.set(fromUserId, {
+          ...callingClientFrom,
+          isConnected: true,
+        });
+
+        if (callingClientTo && callingClientTo.isConnected) {
+          callingClients.delete(fromUserId);
+          callingClients.delete(toUserId);
+        }
       }
     }
   });
@@ -177,10 +191,12 @@ const addToActive = (socket: Socket<any>) => {
 
     if (isAlreadyConnected) {
       activeUsers.set(userId, {
+        callRooms: [],
         conectedInstance: [...isAlreadyConnected.conectedInstance, socket.id],
       });
     } else {
       activeUsers.set(userId, {
+        callRooms: [],
         conectedInstance: [socket.id],
       });
     }
@@ -192,26 +208,26 @@ const addToActive = (socket: Socket<any>) => {
     );
 
     if (foundDisconnectedUser) {
-      const foundUserInCallingClients = callingClients.get(foundDisconnectedUser.userId);
+      const isThisSocketConnectedToCallRoom = foundDisconnectedUser.callRooms.find((data) => data.ioId === socket.id);
 
-      if (foundUserInCallingClients) {
-        callingClients.delete(foundDisconnectedUser.userId);
+      if (isThisSocketConnectedToCallRoom) {
+        const foundCallRoom = isThisSocketConnectedToCallRoom;
 
-        const foundRoomBefore = callRooms.get(foundUserInCallingClients.roomId)!;
+        const foundRoomBefore = callRooms.get(foundCallRoom.roomId)!;
         const userIndexInCallRoom = foundRoomBefore.findIndex((data) => data.userId === foundDisconnectedUser.userId);
 
         foundRoomBefore.splice(userIndexInCallRoom, 1);
 
-        callRooms.set(foundUserInCallingClients.roomId, foundRoomBefore);
+        callRooms.set(foundCallRoom.roomId, foundRoomBefore);
 
-        const foundRoomAfter = callRooms.get(foundUserInCallingClients.roomId)!;
+        const foundRoomAfter = callRooms.get(foundCallRoom.roomId)!;
 
         foundRoomAfter.forEach((data) => {
-          io.to(data.ioId).emit("userDisconected", { userId: foundDisconnectedUser.userId });
+          io.to(data.ioId).emit("userDisconectedFromRoom", { userId: foundDisconnectedUser.userId });
         });
 
         if (foundRoomAfter.length === 0) {
-          callRooms.delete(foundUserInCallingClients.roomId);
+          callRooms.delete(foundCallRoom.roomId);
         }
       }
 
@@ -222,6 +238,7 @@ const addToActive = (socket: Socket<any>) => {
         foundDisconnectedUser.conectedInstance.splice(indexOfInstanceToRemove, 1);
 
         activeUsers.set(foundDisconnectedUser.userId, {
+          callRooms: [],
           conectedInstance: foundDisconnectedUser.conectedInstance,
         });
       }
@@ -287,6 +304,21 @@ const initializeCall = (socket: Socket<any>) => {
           userId: data.userId,
         });
       });
+
+      const activeUser = activeUsers.get(userId);
+
+      if (activeUser) {
+        activeUsers.set(userId, {
+          ...activeUser,
+          callRooms: [
+            ...activeUser.callRooms,
+            {
+              ioId: socket.id,
+              roomId: roomId,
+            },
+          ],
+        });
+      }
     } else {
       // #SKKJ to znaczy, że coś się zjebało z połączeniem i trzeba ponowić (refresh u clienta czy coś)
     }

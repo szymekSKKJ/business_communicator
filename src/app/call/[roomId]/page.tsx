@@ -23,8 +23,6 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
   const [isLocalStreamMuted, setIsLocalStreamMuted] = useState(false);
   const [isLocalVideoStreamOn, setIsLocalVideoStreamOn] = useState(false);
 
-  const [streamLocalVideo, setStreamLocalVideo] = useState<null | MediaStream>(null);
-
   useEffect(() => {
     if (socketSignal.value) {
       setIsSocketAvailable(true);
@@ -35,9 +33,9 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
     (async () => {
       const streamLocal = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1280, min: 640 },
-          height: { ideal: 720, min: 360 },
-          frameRate: { ideal: 60, min: 30 },
+          width: { ideal: 640, min: 640 },
+          height: { ideal: 360, min: 360 },
+          frameRate: { ideal: 30, min: 10 },
         },
         audio: {
           autoGainControl: false,
@@ -78,7 +76,7 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
         }
       });
 
-      socket.on("userDisconected", (data: { userId: string }) => {
+      socket.on("userDisconectedFromRoom", (data: { userId: string }) => {
         const { userId } = data;
 
         setRoomUsers((currentValue) => {
@@ -123,7 +121,7 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
               return (
                 <User
                   key={userData.id}
-                  streamLocalVideo={streamLocalVideo}
+                  isLocalVideoStreamOn={isLocalVideoStreamOn}
                   roomId={roomId}
                   currentUserId={currentUserId!}
                   data={userData}
