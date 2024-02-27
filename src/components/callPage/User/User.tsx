@@ -99,7 +99,10 @@ const startVoicePowerCalculation = (stream: MediaStream, userElement: HTMLDivEle
 interface componentProps {
   data: userSmallData;
   currentUserId: string;
-  streamLocal: MediaStream;
+  streamLocal: {
+    audio: MediaStream;
+    video: MediaStream;
+  };
   roomId: string;
   isLocalVideoStreamOn: boolean;
 }
@@ -127,8 +130,8 @@ const User = ({ data, currentUserId, streamLocal, roomId, isLocalVideoStreamOn }
 
   useEffect(() => {
     if (userId !== currentUserId) {
-      const sender = peerConnection.addTrack(streamLocal.getAudioTracks()[0], streamLocal);
-      const sender1 = peerConnection.addTrack(streamLocal.getVideoTracks()[0], streamLocal);
+      const sender = peerConnection.addTrack(streamLocal.audio.getAudioTracks()[0], streamLocal.audio);
+      const sender1 = peerConnection.addTrack(streamLocal.video.getVideoTracks()[0], streamLocal.audio);
 
       return () => {
         peerConnection.removeTrack(sender);
@@ -231,9 +234,9 @@ const User = ({ data, currentUserId, streamLocal, roomId, isLocalVideoStreamOn }
           }
         };
       } else {
-        const requestAnimationFrameId = startVoicePowerCalculation(streamLocal, componentElementRef.current!);
+        const requestAnimationFrameId = startVoicePowerCalculation(streamLocal.audio, componentElementRef.current!);
 
-        videooElementRef.current!.srcObject = streamLocal;
+        videooElementRef.current!.srcObject = streamLocal.audio;
 
         return () => {
           window.cancelAnimationFrame(requestAnimationFrameId);
@@ -250,7 +253,7 @@ const User = ({ data, currentUserId, streamLocal, roomId, isLocalVideoStreamOn }
     <div className={`${styles.user} ${isUserConnected === false ? styles.notConnected : ""}`} ref={componentElementRef}>
       <audio ref={audioElementRef} autoPlay muted={false}></audio>
       <video
-        className={`${isRemoteVideoStreamOn ? "" : currentUserId !== userId ? styles.off : streamLocal.getVideoTracks()[0].enabled ? "" : styles.off}`}
+        className={`${isRemoteVideoStreamOn ? "" : currentUserId !== userId ? styles.off : streamLocal.video.getVideoTracks()[0].enabled ? "" : styles.off}`}
         ref={videooElementRef}
         autoPlay
         muted={true}
@@ -262,7 +265,7 @@ const User = ({ data, currentUserId, streamLocal, roomId, isLocalVideoStreamOn }
             ? styles.remoteVideoStreamOn
             : currentUserId !== userId
             ? styles.remoteVideoStreamOff
-            : streamLocal.getVideoTracks()[0].enabled
+            : streamLocal.video.getVideoTracks()[0].enabled
             ? styles.remoteVideoStreamOn
             : styles.remoteVideoStreamOff
         }`}>

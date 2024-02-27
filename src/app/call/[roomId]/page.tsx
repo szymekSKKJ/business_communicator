@@ -18,7 +18,10 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
   const [roomUsers, setRoomUsers] = useState<userSmallData[]>([]);
   const [isSocketAvailable, setIsSocketAvailable] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [streamLocal, setSreamLocal] = useState<null | MediaStream>(null);
+  const [streamLocal, setStreamLocal] = useState<null | {
+    audio: MediaStream;
+    video: MediaStream;
+  }>(null);
   const [lastRefusedCallFromUser, setLastRefusedCallFromUse] = useState<null | userSmallData>(null);
   const [isLocalStreamMuted, setIsLocalStreamMuted] = useState(false);
   const [isLocalVideoStreamOn, setIsLocalVideoStreamOn] = useState(false);
@@ -31,6 +34,8 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
 
   useEffect(() => {
     (async () => {
+      const audioContext = new AudioContext();
+
       const streamLocal = await navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: 640, min: 640 },
@@ -41,17 +46,49 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
           autoGainControl: false,
           echoCancellation: false,
           noiseSuppression: true,
+          sampleRate: { ideal: 48000 },
         },
       });
+      //@ts-ignore
+      await window.RNNoiseNode.register(audioContext);
+
+      const source = audioContext.createMediaStreamSource(streamLocal);
+
+      //@ts-ignore
+      const rnnoise = new RNNoiseNode(audioContext);
+      const destination = audioContext.createMediaStreamDestination();
+
+      const compressor = audioContext.createDynamicsCompressor();
+
+      compressor.threshold.setValueAtTime(-20, audioContext.currentTime);
+      compressor.knee.setValueAtTime(40, audioContext.currentTime);
+      compressor.ratio.setValueAtTime(12, audioContext.currentTime);
+      compressor.attack.setValueAtTime(0, audioContext.currentTime);
+      compressor.release.setValueAtTime(0.25, audioContext.currentTime);
+
+      const filter = audioContext.createBiquadFilter();
+
+      filter.Q.value = 8.3;
+      filter.frequency.value = 1000;
+      filter.gain.value = 1.0;
+      filter.type = "bandpass";
+
+      filter.connect(compressor);
+      source.connect(compressor).connect(rnnoise).connect(destination);
+      console.log(1);
 
       streamLocal.getVideoTracks()[0].enabled = false;
 
-      setSreamLocal(streamLocal);
+      setStreamLocal({
+        audio: destination.stream,
+        video: streamLocal,
+      });
     })();
 
     return () => {
       if (streamLocal) {
-        streamLocal.getTracks().forEach((track) => track.stop());
+        streamLocal.audio.getTracks().forEach((track) => track.stop());
+        streamLocal.video.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
@@ -170,11 +207,11 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
               onClick={() => {
                 setIsLocalStreamMuted((currentValue) => {
                   if (currentValue === false) {
-                    streamLocal.getAudioTracks()[0].enabled = false;
+                    streamLocal.audio.getAudioTracks()[0].enabled = false;
 
                     return true;
                   } else {
-                    streamLocal.getAudioTracks()[0].enabled = true;
+                    streamLocal.audio.getAudioTracks()[0].enabled = true;
 
                     return false;
                   }
@@ -196,11 +233,11 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
 
                 setIsLocalVideoStreamOn((currentValue) => {
                   if (currentValue === false) {
-                    streamLocal.getVideoTracks()[0].enabled = true;
+                    streamLocal.video.getVideoTracks()[0].enabled = true;
 
                     return true;
                   } else {
-                    streamLocal.getVideoTracks()[0].enabled = false;
+                    streamLocal.video.getVideoTracks()[0].enabled = false;
 
                     return false;
                   }

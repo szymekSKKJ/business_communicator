@@ -7,6 +7,7 @@ import { userGetByPublicId } from "./api/user/getByPublicId/[publicId]/route";
 import { authOptions, sessionUser } from "./api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import WebSocketBackgroundActions from "@/components/WebSocketBackgroundActions/WebSocketBackgroundActions";
+import Script from "next/script";
 
 const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
@@ -26,6 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <head>
         <script src="https://kit.fontawesome.com/845eb6a366.js" crossOrigin="anonymous" async></script>
+        <script src="/rnnoise/rnnoise-runtime.js"></script>
       </head>
       <body className={montserrat.className}>
         <Notifications></Notifications>
