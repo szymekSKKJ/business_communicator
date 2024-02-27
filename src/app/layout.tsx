@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script src="/rnnoise/rnnoise-runtime.js"></script>
       </head>
       <body className={montserrat.className}>
-        <MainNavigation currentUser={userData ? userData.data : null}></MainNavigation>
+        {userData && <MainNavigation currentUser={userData.data}></MainNavigation>}
         <Notifications></Notifications>
         <Loader></Loader>
         {userData?.data && <WebSocketBackgroundActions currentUser={userData.data}></WebSocketBackgroundActions>}
