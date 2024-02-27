@@ -3,11 +3,12 @@
   --profileImage-left-offset: 25px;
 
   width: 100%;
+  max-width: 1300px;
   height: 691px; // From dev tools
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
-  max-width: 1300px;
+
   margin: 0px auto 0px auto;
 
   .banner {

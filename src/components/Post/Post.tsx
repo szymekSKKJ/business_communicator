@@ -110,7 +110,7 @@ const Post = ({ postData, currentUser }: componentProps) => {
                 setAreCommentsLoading(true);
               }
             }}>
-            <Image src={commentIcon} alt="Ikona"></Image>Skomentuj <span> {postData._count.comments}</span>
+            <Image src={commentIcon} alt="Ikona"></Image>Skomentuj <span> {comments.length === 0 ? postData._count.comments : comments.length}</span>
           </button>
           <button className={`${montserrat.className}`}>
             <Image src={shareIcon} alt="Ikona"></Image>Udostępnij <span>{postData._count.sharedBy}</span>
@@ -123,6 +123,29 @@ const Post = ({ postData, currentUser }: componentProps) => {
               isOpen={areCommentsOpen}
               onSend={async (_event, textareaValue) => {
                 await commentCreate(postData.id, textareaValue.replace(/\s+/g, " ").trim());
+
+                setComments((currentValue) => {
+                  const copiedCurrentValue = structuredClone(currentValue);
+
+                  copiedCurrentValue.unshift({
+                    content: textareaValue.replace(/\s+/g, " ").trim(),
+                    id: crypto.randomUUID(),
+                    _count: {
+                      postSubComment: 0,
+                      likedBy: 0,
+                    },
+                    createdAt: new Date(),
+                    doesCurrentUserLikesThisComment: false,
+                    author: {
+                      id: currentUser.id,
+                      name: currentUser.name,
+                      publicId: currentUser.publicId!,
+                      profileImage: currentUser.profileImage,
+                    },
+                  });
+
+                  return copiedCurrentValue;
+                });
               }}></SendComment>
           )}
           {postData.mostLikedComment && (

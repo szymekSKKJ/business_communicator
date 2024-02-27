@@ -7,20 +7,22 @@ import styles from "./styles.module.scss";
 import Image from "next/image";
 import "moment/locale/pl";
 import imageIcon from "../../../public/create_post/image.svg";
-import { useRef, useState } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 import closeIcon from "../../../public/create_post/close.svg";
 import { postCreate } from "@/app/api/post/create/[userId]/route";
 import Loader from "./Loader/Loader";
 import { createNotification } from "../Notifications/Notifications";
 import { user } from "@/app/api/user/types";
+import { post } from "@/app/api/post/types";
 
 const isEmpty = (str: string) => !str || /^\s*$/.test(str);
 
 interface componentProps {
   currentUser: user;
+  setPosts: Dispatch<SetStateAction<post[]>>;
 }
 
-const CreatePost = ({ currentUser }: componentProps) => {
+const CreatePost = ({ currentUser, setPosts }: componentProps) => {
   const [images, setImages] = useState<
     {
       id: string;
@@ -159,6 +161,39 @@ const CreatePost = ({ currentUser }: componentProps) => {
 
                 const responseData = await postCreate(currentUser.id, textareaElement.innerText.replace(/\s+/g, " ").trim(), newImagesData);
 
+                setPosts((currentValue) => {
+                  const copiedCurrentValue = structuredClone(currentValue);
+
+                  const newImagesDataForNewPost = newImagesData.map((data) => {
+                    return {
+                      id: data.id,
+                      order: data.order,
+                      url: URL.createObjectURL(data.file),
+                    };
+                  });
+
+                  copiedCurrentValue.unshift({
+                    id: crypto.randomUUID(),
+                    createdAt: new Date(),
+                    content: textareaElement.innerText.replace(/\s+/g, " ").trim(),
+                    imagesData: newImagesDataForNewPost,
+                    author: {
+                      id: currentUser.id,
+                      publicId: currentUser.publicId!,
+                      profileImage: currentUser.profileImage,
+                      name: currentUser.name,
+                    },
+                    doesCurrentUserLikesThisPost: false,
+                    mostLikedComment: null,
+                    _count: {
+                      likedBy: 0,
+                      comments: 0,
+                      sharedBy: 0,
+                    },
+                  });
+
+                  return copiedCurrentValue;
+                });
                 setIsPostSending(false);
 
                 if (responseData.status === 200) {

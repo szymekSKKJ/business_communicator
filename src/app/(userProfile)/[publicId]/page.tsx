@@ -25,7 +25,7 @@ const UserProfilePage = async ({ params: { publicId } }: componentsProps) => {
           <Background backgroundUrl={foundUserData.data.backgroundImage}></Background>
           <Header userData={foundUserData.data} currentUser={currentUser}></Header>
           <UserProfile>
-            <Posts userData={foundUserData.data} currentUser={currentUser}></Posts>
+            <Posts user={foundUserData.data} currentUser={currentUser}></Posts>
           </UserProfile>
         </>
       ) : (

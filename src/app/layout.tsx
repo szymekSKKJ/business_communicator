@@ -8,6 +8,7 @@ import { authOptions, sessionUser } from "./api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import WebSocketBackgroundActions from "@/components/WebSocketBackgroundActions/WebSocketBackgroundActions";
 import Script from "next/script";
+import MainNavigation from "@/components/MainNavigation/MainNavigation";
 
 const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
@@ -30,6 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script src="/rnnoise/rnnoise-runtime.js"></script>
       </head>
       <body className={montserrat.className}>
+        <MainNavigation currentUser={userData ? userData.data : null}></MainNavigation>
         <Notifications></Notifications>
         <Loader></Loader>
         {userData?.data && <WebSocketBackgroundActions currentUser={userData.data}></WebSocketBackgroundActions>}

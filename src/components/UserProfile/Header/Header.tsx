@@ -81,7 +81,10 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
 
                   return copiedCurrentValue;
                 });
-                await userGiveFollow(currentUser.id, userData.id, userData.doesCurrentUserFollowThisUser!);
+
+                const response = await userGiveFollow(currentUser.id, userData.id, userData.doesCurrentUserFollowThisUser!);
+
+                console.log(response);
               }}>
               {userData.doesCurrentUserFollowThisUser ? (
                 <>

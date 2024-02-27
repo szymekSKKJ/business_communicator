@@ -68,7 +68,7 @@ export const GET = async (request: Request, { params: { publicId } }: { params: 
           ...user,
           profileImage: profileImageUrl,
           backgroundImage: backgroundImageUrl,
-          doesCurrentUserFollowThisUser: doesCurrentUserFollowThisUser === null ? false : true,
+          doesCurrentUserFollowThisUser: doesCurrentUserFollowThisUser,
           averageOpinion: averageOpinion._avg.value ? averageOpinion._avg.value.toFixed(1) : null,
         });
       } catch (e) {}
@@ -77,7 +77,7 @@ export const GET = async (request: Request, { params: { publicId } }: { params: 
         ...user,
         profileImage: profileImageUrl,
         backgroundImage: null,
-        doesCurrentUserFollowThisUser: doesCurrentUserFollowThisUser === null ? false : true,
+        doesCurrentUserFollowThisUser: doesCurrentUserFollowThisUser,
         averageOpinion: averageOpinion._avg.value ? averageOpinion._avg.value.toFixed(1) : null,
       });
     } else {
@@ -96,9 +96,7 @@ export const userGetByPublicId = async (publicId: string, isServerSide: boolean 
     const headers = await import("next/headers");
 
     const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/user/getByPublicId/${publicId}`, {
-      next: {
-        revalidate: 10,
-      },
+      cache: "no-cache",
       method: "GET",
       headers: new Headers(headers.headers()),
     }).then(async (response) => await response.json())) as response<user>;
@@ -106,10 +104,7 @@ export const userGetByPublicId = async (publicId: string, isServerSide: boolean 
     return responseData;
   } else {
     const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/user/getByPublicId/${publicId}`, {
-      next: {
-        revalidate: 10,
-      },
-
+      cache: "no-cache",
       method: "GET",
     }).then(async (response) => await response.json())) as response<user>;
 

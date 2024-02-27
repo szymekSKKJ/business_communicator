@@ -3,7 +3,7 @@ import styles from "./styles.module.scss";
 import Button from "@/components/UI/Button/Button";
 import Image from "next/image";
 import { socketSignal } from "../WebSocketBackgroundActions";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 interface componentProps {
   data: {
@@ -20,10 +20,12 @@ interface componentProps {
 }
 
 const CallingUser = ({ data, setCallingData, currentUserId }: componentProps) => {
+  const [isClosing, setIsClosing] = useState(false);
+
   const { user, roomId } = data;
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} ${isClosing ? styles.closing : ""}`}>
       <div className={`${styles.content}`}>
         <div className={`${styles.user}`}>
           <div className={`${styles.imageWrapper}`}>
@@ -53,7 +55,10 @@ const CallingUser = ({ data, setCallingData, currentUserId }: componentProps) =>
                 toUserId: user.id,
                 fromUserId: currentUserId,
               });
-              setCallingData(null);
+              setIsClosing(true);
+              setTimeout(() => {
+                setCallingData(null);
+              }, 250); // Time of animation
             }}>
             Odrzuć
           </Button>

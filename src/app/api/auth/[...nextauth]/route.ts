@@ -26,11 +26,6 @@ export const authOptions = {
         },
       },
     }),
-
-    // FacebookProvider({
-    //   clientId: process.env.FACEBOOK_CLIENT_ID,
-    //   clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
-    // }),
   ],
 
   callbacks: {
@@ -52,6 +47,8 @@ export const authOptions = {
           session.user.name = userData.name!;
           session.user.email = userData.email!;
         }
+
+        return session;
       }
 
       return session;

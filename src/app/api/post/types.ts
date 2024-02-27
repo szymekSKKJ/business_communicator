@@ -8,15 +8,11 @@ export type post = {
   author: {
     id: string;
     name: string;
-    email: string;
-    emailVerified: Date | null;
     profileImage: string;
     publicId: string;
-    description: string;
-    postSubCommentReplyId: string;
   };
   doesCurrentUserLikesThisPost: boolean;
-  mostLikedComment: comment;
+  mostLikedComment: comment | null;
   _count: {
     likedBy: number;
     comments: number;

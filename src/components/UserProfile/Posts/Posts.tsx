@@ -1,28 +1,19 @@
 import { postGetSome } from "@/app/api/post/getSome/[userId]/route";
 import style from "./styles.module.scss";
 import { user } from "@/app/api/user/types";
-import CreatePost from "@/components/CreatePost/CreatePost";
-import Post from "@/components/Post/Post";
+import ClientWrapper from "./ClientWrapper/ClientWrapper";
 
 interface componentProps {
-  userData: user;
+  user: user;
   currentUser: user | null;
 }
 
-const Posts = async ({ userData, currentUser }: componentProps) => {
-  const last20Posts = await postGetSome(userData.id);
+const Posts = async ({ user, currentUser }: componentProps) => {
+  const last20Posts = await postGetSome(user.id);
 
   return (
     <div className={`${style.posts}`}>
-      {currentUser && <CreatePost currentUser={currentUser}></CreatePost>}
-      {last20Posts.status === 200 &&
-        last20Posts.data &&
-        last20Posts.data.length !== 0 &&
-        last20Posts.data.map((postData) => {
-          const { id } = postData;
-
-          return <Post key={id} currentUser={currentUser} postData={postData}></Post>;
-        })}
+      <ClientWrapper posts={last20Posts.data ? last20Posts.data : []} currentUser={currentUser} user={user}></ClientWrapper>
     </div>
   );
 };

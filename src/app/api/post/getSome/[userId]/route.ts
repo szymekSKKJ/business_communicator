@@ -5,14 +5,13 @@ import { comment } from "@/app/api/comment/getSome/[postId]/route";
 import { createResponse, response } from "@/app/api/responseTypes";
 import { post } from "../../types";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { user } from "@/app/api/user/types";
+import { authOptions } from "../../../auth/[...nextauth]/route";
+import { headers } from "next/headers";
 
 export const GET = async (request: Request, { params: { userId } }: { params: { userId: string } }) => {
   try {
     const url = new URL(request.url);
 
-    // #SKKJ do sprawdzenia
     const posts = await prisma.post.findMany({
       skip: parseInt(url.searchParams.get("skip") as string),
       take: parseInt(url.searchParams.get("take") as string),
@@ -27,7 +26,13 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
         createdAt: true,
         content: true,
         imagesData: true,
-        author: true,
+        author: {
+          select: {
+            id: true,
+            publicId: true,
+            name: true,
+          },
+        },
         _count: {
           select: {
             likedBy: true,
@@ -39,6 +44,10 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
     });
 
     const storage = getStorage();
+
+    const session = await getServerSession(authOptions);
+
+    const currentUserId = session === null ? null : session.user.id;
 
     await Promise.all(
       posts.map(async (postData) => {
@@ -73,10 +82,6 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
           },
         })) as comment | null;
 
-        const session = await getServerSession(authOptions);
-
-        const currentUserId = session === null ? null : session.user.id;
-
         const doesCurrentUserLikesThisPost =
           currentUserId === null
             ? false
@@ -102,6 +107,8 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
 
         postData.imagesData = parsedImagesData;
 
+        const postDataNewType = postData as post;
+
         if (mostLikedComment) {
           const urlImage = await getDownloadURL(ref(storage, `users/${userId}/profileImage.webp`));
 
@@ -125,12 +132,12 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
           doesCurrentUserLikesThisComment;
           mostLikedComment.doesCurrentUserLikesThisComment = doesCurrentUserLikesThisComment;
 
-          postData.mostLikedComment = mostLikedComment;
+          postDataNewType.mostLikedComment = mostLikedComment;
         }
 
         const postAuthorImage = await getDownloadURL(ref(storage, `users/${postData.author.id}/profileImage.webp`));
-        postData.author.profileImage = postAuthorImage;
-        postData.doesCurrentUserLikesThisPost = doesCurrentUserLikesThisPost;
+        postDataNewType.author.profileImage = postAuthorImage;
+        postDataNewType.doesCurrentUserLikesThisPost = doesCurrentUserLikesThisPost;
       })
     );
     return createResponse(200, null, posts);
@@ -143,6 +150,8 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
 export const postGetSome = async (userId: string, skip: string = "0", take: string = "10"): Promise<response<post[]>> => {
   const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/post/getSome/${userId}?skip=${skip}&take=${take}`, {
     cache: "no-cache",
+    method: "GET",
+    headers: new Headers(headers()),
   }).then(async (response) => await response.json())) as response<post[]>;
 
   return responseData;

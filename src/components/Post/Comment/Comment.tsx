@@ -98,7 +98,7 @@ const Comment = ({ data, currentUser, setAreCommentsOpen, areCommentsOpen }: com
               setAreSubCommentsLoading(true);
             }
           }}>
-          <Image src={commentIcon} alt="Ikona"></Image>Skomentuj <span>{data._count.postSubComment}</span>
+          <Image src={commentIcon} alt="Ikona"></Image>Skomentuj <span>{subComments.length === 0 ? data._count.postSubComment : subComments.length}</span>
         </button>
       </div>
       <div className={`${styles.subComments} ${areSubCommentsOpen ? styles.open : ""}`}>
@@ -108,6 +108,29 @@ const Comment = ({ data, currentUser, setAreCommentsOpen, areCommentsOpen }: com
             isOpen={areSubCommentsOpen}
             onSend={async (_event, textareaValue) => {
               await subCommentCreate(data.id, textareaValue.replace(/\s+/g, " ").trim());
+
+              setSubComments((currentValue) => {
+                const copiedCurrentValue = structuredClone(currentValue);
+
+                copiedCurrentValue.unshift({
+                  id: crypto.randomUUID(),
+                  createdAt: new Date(),
+                  content: textareaValue.replace(/\s+/g, " ").trim(),
+                  doesUserLikesThisSubComment: false,
+                  author: {
+                    id: currentUser.id,
+                    name: currentUser.name,
+                    publicId: currentUser.publicId,
+                    image: currentUser.profileImage,
+                  },
+                  _count: {
+                    likedBy: 0,
+                    postSubCommentReply: 0,
+                  },
+                });
+
+                return copiedCurrentValue;
+              });
             }}></SendComment>
         )}
 
