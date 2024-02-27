@@ -257,8 +257,8 @@ const User = ({ data, currentUserId, streamLocal, roomId, isLocalVideoStreamOn }
         ref={videooElementRef}
         autoPlay
         muted={true}
-        width={1280}
-        height={720}></video>
+        width={640}
+        height={360}></video>
       <div
         className={`${styles.userData} ${
           isRemoteVideoStreamOn

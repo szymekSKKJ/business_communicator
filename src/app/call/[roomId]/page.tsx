@@ -38,15 +38,14 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
 
       const streamLocal = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 640, min: 640 },
-          height: { ideal: 360, min: 360 },
-          frameRate: { ideal: 30, min: 10 },
+          width: 640,
+          height: 360,
+          frameRate: 30,
         },
         audio: {
           autoGainControl: false,
           echoCancellation: false,
           noiseSuppression: true,
-          sampleRate: { ideal: 48000 },
         },
       });
       //@ts-ignore
@@ -75,7 +74,6 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
 
       filter.connect(compressor);
       source.connect(compressor).connect(rnnoise).connect(destination);
-      console.log(1);
 
       streamLocal.getVideoTracks()[0].enabled = false;
 
