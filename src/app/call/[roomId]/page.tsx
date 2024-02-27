@@ -40,7 +40,7 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
         video: {
           width: 640,
           height: 360,
-          frameRate: 30,
+          frameRate: 15,
         },
         audio: {
           autoGainControl: false,

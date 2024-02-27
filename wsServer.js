@@ -303,7 +303,27 @@ var initializeCall = function (socket) {
             }
         }
         else {
-            // #SKKJ to znaczy, że coś się zjebało z połączeniem i trzeba ponowić (refresh u clienta czy coś)
+            callRooms.set(roomId, [
+                {
+                    userId: userId,
+                    ioId: socket.id,
+                },
+            ]);
+            var usersInRoomAfter = callRooms.get(roomId);
+            usersInRoomAfter.forEach(function (data) {
+                io.to(data.ioId).emit("userJoined", {
+                    userId: userId,
+                });
+            });
+            var activeUser = activeUsers.get(userId);
+            if (activeUser) {
+                activeUsers.set(userId, __assign(__assign({}, activeUser), { callRooms: __spreadArray(__spreadArray([], activeUser.callRooms, true), [
+                        {
+                            ioId: socket.id,
+                            roomId: roomId,
+                        },
+                    ], false) }));
+            }
         }
     });
     socket.on("refuseCall", function (data) {

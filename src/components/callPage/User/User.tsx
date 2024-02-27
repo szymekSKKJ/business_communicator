@@ -236,7 +236,7 @@ const User = ({ data, currentUserId, streamLocal, roomId, isLocalVideoStreamOn }
       } else {
         const requestAnimationFrameId = startVoicePowerCalculation(streamLocal.audio, componentElementRef.current!);
 
-        videooElementRef.current!.srcObject = streamLocal.audio;
+        videooElementRef.current!.srcObject = streamLocal.video;
 
         return () => {
           window.cancelAnimationFrame(requestAnimationFrameId);

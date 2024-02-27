@@ -320,7 +320,35 @@ const initializeCall = (socket: Socket<any>) => {
         });
       }
     } else {
-      // #SKKJ to znaczy, że coś się zjebało z połączeniem i trzeba ponowić (refresh u clienta czy coś)
+      callRooms.set(roomId, [
+        {
+          userId: userId,
+          ioId: socket.id,
+        },
+      ]);
+
+      const usersInRoomAfter = callRooms.get(roomId)!;
+
+      usersInRoomAfter.forEach((data) => {
+        io.to(data.ioId).emit("userJoined", {
+          userId: userId,
+        });
+      });
+
+      const activeUser = activeUsers.get(userId);
+
+      if (activeUser) {
+        activeUsers.set(userId, {
+          ...activeUser,
+          callRooms: [
+            ...activeUser.callRooms,
+            {
+              ioId: socket.id,
+              roomId: roomId,
+            },
+          ],
+        });
+      }
     }
   });
 
