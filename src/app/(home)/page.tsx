@@ -17,6 +17,7 @@ const HomePage = async () => {
 
     if (userMisingInformation) {
       return <EditUserProfile userData={session.user}></EditUserProfile>;
+    } else {
     }
   } else {
     return <Login></Login>;
