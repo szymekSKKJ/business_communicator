@@ -2,9 +2,6 @@
 
 import { ButtonHTMLAttributes, MouseEventHandler, useState } from "react";
 import styles from "./styles.module.scss";
-import { Montserrat } from "next/font/google";
-
-const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   currentLikes: number;
@@ -13,7 +10,7 @@ interface componentProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   onClickCallback?: (likesData: { currentLikes: number; value: boolean }) => any;
 }
 
-const LikeButton = ({ onClick, children, currentLikes, doesCurrentUserLikesThat, onClickCallback, ...rest }: componentProps) => {
+const LikeButton = ({ onClick, children, currentLikes, doesCurrentUserLikesThat, onClickCallback, className, ...rest }: componentProps) => {
   const [likesData, setLikesData] = useState({
     currentLikes: currentLikes,
     value: doesCurrentUserLikesThat,
@@ -22,7 +19,7 @@ const LikeButton = ({ onClick, children, currentLikes, doesCurrentUserLikesThat,
 
   return (
     <button
-      className={`${montserrat.className} ${styles.likeButton}`}
+      className={`${styles.likeButton} ${className}`}
       onClick={(event) => {
         if (isAfterFirstClick === false) {
           setIsAfterFirstCick(true);

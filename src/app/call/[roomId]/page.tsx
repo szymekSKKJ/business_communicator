@@ -11,6 +11,7 @@ import { userGetByIdSmallData } from "@/app/api/user/getByIdSmallData/[id]/route
 import { sessionUser } from "@/app/api/auth/[...nextauth]/route";
 import Image from "next/image";
 import Button from "@/components/UI/Button/Button";
+import initializeRnnoise from "../../../../public/rnnoise/rnnoise-runtime";
 
 const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
   useSignals();
@@ -48,6 +49,9 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
           noiseSuppression: true,
         },
       });
+
+      initializeRnnoise();
+
       //@ts-ignore
       await window.RNNoiseNode.register(audioContext);
 
@@ -81,14 +85,14 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
         audio: destination.stream,
         video: streamLocal,
       });
-    })();
 
-    return () => {
-      if (streamLocal) {
-        streamLocal.audio.getTracks().forEach((track) => track.stop());
-        streamLocal.video.getTracks().forEach((track) => track.stop());
-      }
-    };
+      return () => {
+        if (streamLocal) {
+          streamLocal.getTracks().forEach((track) => track.stop());
+          streamLocal.getTracks().forEach((track) => track.stop());
+        }
+      };
+    })();
   }, []);
 
   useEffect(() => {
@@ -144,6 +148,12 @@ const callPage = ({ params: { roomId } }: { params: { roomId: string } }) => {
           socket.emit("joinToRoom", { roomId: roomId, userId: currentUser.id });
         }
       })();
+
+      return () => {
+        socket.off("callRefused");
+        socket.off("userDisconectedFromRoom");
+        socket.off("userJoined");
+      };
     }
   }, [isSocketAvailable]);
 

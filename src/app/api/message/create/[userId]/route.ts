@@ -1,31 +1,103 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions, sessionUser } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/prisma";
 import { getServerSession } from "next-auth";
 import "../../../../../firebaseInitialization";
 import { createResponse, response } from "@/app/api/responseTypes";
-import { message } from "../../types";
 
 export const POST = async (request: Request, { params: { userId } }: { params: { userId: string } }) => {
   try {
     const session = await getServerSession(authOptions);
+    const sessionUser = session.user as sessionUser;
 
-    if (session) {
+    if (sessionUser.id === userId) {
       const requestData = await request.formData();
 
-      const content = requestData.get("content") as string;
-      const sendingToUserId = requestData.get("sendingToUserId") as string;
+      const messageContent = requestData.get("messageContent") as string;
+      const chatRoomId = requestData.get("chatRoomId") as string | null;
+      const participantsId = requestData.get("participantsId") ? [...JSON.parse(requestData.get("participantsId") as string)] : null;
 
-      const responseData = await prisma.sentMessages.create({
-        data: {
-          sentToUserId: sendingToUserId,
-          senderUserId: userId,
-          content: content,
-        },
-      });
+      if (chatRoomId === null && participantsId) {
+        const createdChatRoom = await prisma.chatRoom.create({
+          data: {
+            participants: {
+              create: participantsId.map((id: string) => {
+                return {
+                  userId: id,
+                };
+              }),
+            },
+          },
+        });
 
-      return createResponse(200, null, responseData);
+        const createdMessage = await prisma.sentMessage.create({
+          data: {
+            chatRoomId: createdChatRoom.id,
+            content: messageContent,
+            senderUserId: userId,
+          },
+        });
+
+        await prisma.chatRoom.update({
+          where: {
+            id: createdChatRoom.id,
+          },
+          data: {
+            participants: {
+              updateMany: {
+                where: {
+                  userId: userId,
+                },
+                data: {
+                  lastReadMessageId: createdMessage.id,
+                },
+              },
+            },
+          },
+        });
+
+        return createResponse(200, null, { chatRoomId: createdChatRoom.id });
+      } else if (chatRoomId) {
+        const doesThisUserExistsInThisChatRoom = await prisma.chatRoom.findUnique({
+          where: {
+            id: chatRoomId,
+            participants: {
+              some: {
+                userId: userId,
+              },
+            },
+          },
+        });
+
+        if (doesThisUserExistsInThisChatRoom) {
+          const chatRoom = doesThisUserExistsInThisChatRoom;
+
+          const createdMessage = await prisma.sentMessage.create({
+            data: {
+              chatRoomId: chatRoom.id,
+              content: messageContent,
+              senderUserId: userId,
+            },
+          });
+
+          await prisma.chatRoomParticipant.updateMany({
+            where: {
+              chatRoomId: chatRoom.id,
+              userId: userId,
+            },
+            data: {
+              lastReadMessageId: createdMessage.id,
+            },
+          });
+
+          return createResponse(200, null, null);
+        } else {
+          return createResponse(400, "This user does not belongs to this room", null);
+        }
+      } else {
+        return createResponse(400, "Bad gateway", null);
+      }
     } else {
-      return createResponse(200, "User is not that user", null);
+      return createResponse(400, "User is not that user", null);
     }
   } catch (e) {
     const error = e as Error;
@@ -33,16 +105,28 @@ export const POST = async (request: Request, { params: { userId } }: { params: {
   }
 };
 
-export const messageCreate = async (userId: string, content: string, sendingToUserId: string): Promise<response<message>> => {
+export const messageCreate = async (
+  userId: string,
+  messageContent: string,
+  chatRoomId: string | null,
+  participantsId: string[] | null
+): Promise<response<{ roomId: string; messageId: string } | null>> => {
   const formData = new FormData();
 
-  formData.append(`sendingToUserId`, `${sendingToUserId}`);
-  formData.append(`content`, `${content}`);
+  if (chatRoomId) {
+    formData.append(`chatRoomId`, `${chatRoomId}`);
+  }
+
+  if (participantsId) {
+    formData.append(`participantsId`, JSON.stringify(participantsId));
+  }
+
+  formData.append(`messageContent`, `${messageContent}`);
 
   const responseData = (await fetch(`${process.env.NEXT_PUBLIC_URL}/api/message/create/${userId}`, {
     method: "POST",
     body: formData,
-  }).then(async (response) => await response.json())) as response<message>;
+  }).then(async (response) => await response.json())) as response<{ roomId: string; messageId: string } | null>;
 
   return responseData;
 };

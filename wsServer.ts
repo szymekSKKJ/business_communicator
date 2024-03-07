@@ -41,19 +41,50 @@ const callRooms = new Map<
 >();
 
 const logicForMessages = (socket: Socket<any>) => {
-  socket.on("sendingMessage", (message: { fromUserId: string; toUserId: string; content: string; messageId: string; fromUserPublicId: string }) => {
-    const { toUserId, content, fromUserId, messageId, fromUserPublicId } = message;
-    const foundClient = activeUsers.get(toUserId);
+  socket.on(
+    "sendMessage",
+    ({
+      message,
+      fromUserId,
+      toUserId,
+      chatRoomId,
+      messageId,
+    }: {
+      messageId: string;
+      fromUserId: string;
+      toUserId: string;
+      message: string;
+      chatRoomId: string;
+    }) => {
+      const foundClient = activeUsers.get(toUserId);
 
-    foundClient?.conectedInstance.forEach((ioId) => {
-      io.to(ioId).emit("receivingMessage", {
-        toUserPublicId: fromUserPublicId,
-        id: messageId,
-        toUserId: fromUserId,
-        content: content,
+      if (foundClient) {
+        foundClient.conectedInstance.forEach((ioId) => {
+          io.to(ioId).emit("messageReceived", {
+            fromUserId: fromUserId,
+            message: message,
+            chatRoomId: chatRoomId,
+            messageId: messageId,
+          });
+        });
+      }
+    }
+  );
+
+  socket.on(
+    "messageRead",
+    ({ fromUserId, chatRoomId, messageId, toUserId }: { toUserId: string; fromUserId: string; chatRoomId: string; messageId: string }) => {
+      const foundClient = activeUsers.get(toUserId);
+
+      foundClient?.conectedInstance.forEach((ioId) => {
+        io.to(ioId).emit("messageRead", {
+          fromUserId: fromUserId,
+          messageId: messageId,
+          chatRoomId: chatRoomId,
+        });
       });
-    });
-  });
+    }
+  );
 };
 
 const logicForCalling = (socket: Socket<any>) => {
@@ -365,6 +396,19 @@ const initializeCall = (socket: Socket<any>) => {
   });
 };
 
+const createNotification = (socket: Socket<any>) => {
+  socket.on("mainNavigationNotificationMessage", ({ toUserId, fromUserId, chatRoomId }: { toUserId: string; fromUserId: string; chatRoomId: string }) => {
+    const activeUser = activeUsers.get(toUserId);
+
+    activeUser!.conectedInstance.forEach((ioId) => {
+      io.to(ioId).emit("mainNavigationNotificationMessage", {
+        fromUserId: fromUserId,
+        chatRoomId: chatRoomId,
+      });
+    });
+  });
+};
+
 require("events").EventEmitter.defaultMaxListeners = 100;
 
 io.on("connection", (socket) => {
@@ -372,6 +416,7 @@ io.on("connection", (socket) => {
   logicForMessages(socket);
   initializeCall(socket);
   logicForCalling(socket);
+  createNotification(socket);
 });
 
 httpServer.listen(3001);

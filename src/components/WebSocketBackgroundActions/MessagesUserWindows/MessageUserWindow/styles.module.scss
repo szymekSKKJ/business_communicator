@@ -10,19 +10,19 @@
   border-radius: 4px 4px 0px 0px;
   overflow: hidden;
   animation: apearMessageUserWindow 250ms forwards;
-  transform: translateY(100%);
+  transform: translateY(0%);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 
   @keyframes apearMessageUserWindow {
     0% {
-      transform: translateY(100%);
+      transform: translateY(0%);
       opacity: 0;
     }
 
     100% {
-      transform: translateY(0%);
+      transform: translateY(-100%);
       opacity: 1;
     }
   }
@@ -176,75 +176,111 @@
       flex-direction: column;
       gap: 8px;
 
-      .message {
-        width: 100%;
-        height: auto;
-        display: flex;
-        gap: 8px;
-
-        .imageWrapper {
-          width: 32px;
-          height: 32px;
-          overflow: hidden;
-          border-radius: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          flex-shrink: 0;
-
-          img {
-            width: 100%;
-            height: 100%;
-          }
-        }
-
-        .content {
-          width: auto;
+      > div {
+        .message {
+          width: 100%;
           height: auto;
-          background-color: darkgrey;
-          padding: 8px;
+          display: flex;
+          gap: 8px;
+          transition: 250ms;
+          opacity: 1;
 
-          p {
-            font-size: 15px;
-            font-weight: 400;
+          .imageWrapper {
+            width: 32px;
+            height: 32px;
+            overflow: hidden;
+            border-radius: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+
+            img {
+              width: 100%;
+              height: 100%;
+            }
+          }
+
+          .content {
+            width: auto;
+            height: auto;
+            background-color: darkgrey;
+            padding: 8px 12px 8px 12px;
+
+            p {
+              font-size: 15px;
+              font-weight: 400;
+            }
+          }
+        }
+
+        .message.pending {
+          opacity: 0.5;
+        }
+
+        .message.error {
+          background-color: #ee5d7a;
+        }
+
+        .message.from {
+          .imageWrapper {
+            order: 1;
+          }
+
+          .content {
+            order: 2;
+            border-radius: 0px 20px 20px 20px;
+            background-color: #4988ce;
+            margin-right: auto;
+
+            p {
+              color: white;
+            }
+          }
+        }
+
+        .message.to {
+          .imageWrapper {
+            order: 2;
+          }
+
+          .content {
+            order: 1;
+            border-radius: 20px 0px 20px 20px;
+            background-color: #d9d9d9;
+            margin-left: auto;
+          }
+        }
+
+        .lastReadMessage {
+          width: 100%;
+          height: auto;
+
+          .imageWrapper {
+            width: 16px;
+            height: 16px;
+            border-radius: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            margin-left: auto;
+
+            img {
+              width: 100%;
+              height: auto;
+            }
           }
         }
       }
 
-      .message.from {
-        .imageWrapper {
-          order: 1;
-        }
-
-        .content {
-          order: 2;
-          border-radius: 0px 20px 20px 20px;
-          background-color: #4988ce;
-          margin-right: auto;
-
-          p {
-            color: white;
+      > div.to + div.to,
+      div.from + div.from {
+        .message {
+          .imageWrapper {
+            opacity: 0;
           }
-        }
-      }
-
-      .message.to {
-        .imageWrapper {
-          order: 2;
-        }
-
-        .content {
-          order: 1;
-          border-radius: 20px 0px 20px 20px;
-          background-color: #d9d9d9;
-          margin-left: auto;
-        }
-      }
-
-      .message.to + .message.to,
-      .message.from + .message.from {
-        .imageWrapper {
-          opacity: 0;
         }
       }
     }
@@ -344,12 +380,12 @@
 
   @keyframes closeMessageUserWindow {
     0% {
-      transform: translateY(0%);
+      transform: translateY(-100%);
       opacity: 1;
     }
 
     100% {
-      transform: translateY(100%);
+      transform: translateY(0%);
       opacity: 0;
     }
   }

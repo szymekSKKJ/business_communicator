@@ -1,9 +1,6 @@
 "use client";
 import styles from "./styles.module.scss";
 import { ButtonHTMLAttributes, ReactNode } from "react";
-import { Prompt } from "next/font/google";
-
-const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 type themeType = "blue-white" | "red-white";
 
@@ -27,7 +24,7 @@ const Button = ({ children, themeType = "blue-white", className, ...rest }: comp
   const foundTheme = themes.find((themeData) => themeData.type === themeType)?.style;
 
   return (
-    <button className={`${prompt.className} ${styles.button} ${foundTheme} ${className}`} {...rest}>
+    <button className={`${styles.button} ${foundTheme} ${className}`} {...rest}>
       {children}
     </button>
   );

@@ -67,16 +67,38 @@ model User {
     following                User[]                @relation("following")
     followers                User[]                @relation("following")
     lastActive               DateTime              @default(now())
-    sentMessages             SentMessages[]        @relation("sender")
+    sentMessage              SentMessage[]         @relation("sender")
+    chatRoomParticipant      ChatRoomParticipant[]
 }
 
-model SentMessages {
-    id           String   @id @default(cuid())
-    sentToUserId String
-    sender       User     @relation("sender", fields: [senderUserId], references: [id])
-    senderUserId String
-    content      String
-    sentAt       DateTime @default(now())
+// Next auth end
+
+model ChatRoomParticipant {
+    id                String       @id @unique @default(cuid())
+    lastReadMessage   SentMessage? @relation("lastReadMessageInChatRoomParticipant", fields: [lastReadMessageId], references: [id])
+    lastReadMessageId String?
+    lastSeenAtChat    DateTime     @default(now())
+    chatRoom          ChatRoom     @relation(fields: [chatRoomId], references: [id])
+    chatRoomId        String
+    user              User         @relation(fields: [userId], references: [id])
+    userId            String
+}
+
+model ChatRoom {
+    id           String                @id @unique @default(cuid())
+    messages     SentMessage[]
+    participants ChatRoomParticipant[]
+}
+
+model SentMessage {
+    id                  String                @id @default(cuid())
+    sender              User                  @relation("sender", fields: [senderUserId], references: [id])
+    senderUserId        String
+    content             String
+    sentAt              DateTime              @default(now())
+    chatRoom            ChatRoom              @relation(fields: [chatRoomId], references: [id])
+    chatRoomId          String
+    chatRoomParticipant ChatRoomParticipant[] @relation("lastReadMessageInChatRoomParticipant")
 }
 
 model Opinion {
@@ -85,8 +107,6 @@ model Opinion {
     userId  String
     value   Int
 }
-
-// Next auth end
 
 model Post {
     id         String        @id @default(cuid())

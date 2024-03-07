@@ -1,9 +1,6 @@
 "use client";
-import { HTMLAttributes, MutableRefObject, useEffect } from "react";
+import { HTMLAttributes, MutableRefObject } from "react";
 import styles from "./styles.module.scss";
-import { Prompt } from "next/font/google";
-
-const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps extends HTMLAttributes<HTMLSpanElement> {
   placeholder: string;
@@ -20,7 +17,6 @@ const Textarea = ({ placeholder, refProp, ...rest }: componentProps) => {
         }
       }}>
       <span
-        className={`${prompt.className}`}
         contentEditable={true}
         data-placeholder={placeholder}
         role="textarea"

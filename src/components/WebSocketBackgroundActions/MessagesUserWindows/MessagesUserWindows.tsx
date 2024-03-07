@@ -5,73 +5,72 @@ import MessageUserWindow from "./MessageUserWindow/MessageUserWindow";
 import styles from "./styles.module.scss";
 import { signal } from "@preact/signals-react";
 import { useEffect, useState } from "react";
-
 import { user } from "@/app/api/user/types";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
 import { userUpdate } from "@/app/api/user/update/[id]/route";
 import { socketSignal } from "../WebSocketBackgroundActions";
+import { chatRoomGetByParticipantsId, initialRoomData } from "@/app/api/chatRoom/getByParticipantsId/route";
+import { userGetByIdSmallData } from "@/app/api/user/getByIdSmallData/[id]/route";
 
-const currentOpenedMessagesUserWindows = signal<
-  {
-    queue: number;
-    id: string;
-    publicId: string;
-    lastActive: Date;
-    image: string;
-  }[]
->([]);
+const initialRoomsDataSignal = signal<{ id: string; isOpen: boolean; queue: number; participantsId: string[] }[]>([]);
 
-export const addUserToCurrentOpendMessagesUserWindows = async (id: string, userPublicId: string, lastActive: Date, image: string | null = null) => {
-  const isChatAlreadyOpen = currentOpenedMessagesUserWindows.value.some((userData) => userData.id === id);
+export const openNewMessageUserWindow = async (participantsId: string[], chatRoomId: string | null = null) => {
+  const copiedValue = structuredClone(initialRoomsDataSignal.value);
 
-  if (isChatAlreadyOpen === false) {
-    const copiedCurrentValue = [...currentOpenedMessagesUserWindows.value];
+  const queueValue = copiedValue.at(-1) ? copiedValue.at(-1)!.queue : 1;
 
-    if (image === null) {
-      const storage = getStorage();
-      const profileImageUrl = await getDownloadURL(ref(storage, `/users/${id}/profileImage.webp`));
+  const doesChatRoomAlreadyExistByParticipantsId = copiedValue.find((data) => {
+    const { participantsId: participantsIdLocal } = data;
 
-      copiedCurrentValue.push({
-        id: id,
-        queue: copiedCurrentValue.at(0) ? copiedCurrentValue.at(0)!.queue + 1 : 0,
-        publicId: userPublicId,
-        lastActive: lastActive,
-        image: profileImageUrl,
-      });
+    const isEveryParticipantThisSame = participantsIdLocal.every((id) => {
+      if (participantsId.includes(id)) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+    if (isEveryParticipantThisSame) {
+      return true;
     } else {
-      copiedCurrentValue.push({
-        id: id,
-        queue: copiedCurrentValue.at(0) ? copiedCurrentValue.at(0)!.queue + 1 : 0,
-        publicId: userPublicId,
-        lastActive: lastActive,
-        image: image,
-      });
+      return false;
     }
+  });
 
-    currentOpenedMessagesUserWindows.value = copiedCurrentValue;
+  const doesChatRoomAlreadyExistByChatRoomId = copiedValue.find((data) => data.id === chatRoomId);
+
+  const isWindowAlreadyOpened = doesChatRoomAlreadyExistByParticipantsId !== undefined || doesChatRoomAlreadyExistByChatRoomId;
+
+  if (isWindowAlreadyOpened) {
+    const foundRoomData = doesChatRoomAlreadyExistByParticipantsId ? doesChatRoomAlreadyExistByParticipantsId : doesChatRoomAlreadyExistByChatRoomId!;
+
+    foundRoomData.isOpen = true;
   } else {
-    const copiedCurrentValue = [...currentOpenedMessagesUserWindows.value];
-
-    const foundOpenedChat = copiedCurrentValue.find((userData) => userData.id === id);
-
-    foundOpenedChat!.queue = currentOpenedMessagesUserWindows.value.at(0)!.queue + 1;
-
-    currentOpenedMessagesUserWindows.value = copiedCurrentValue;
+    copiedValue.push({
+      id: crypto.randomUUID(),
+      participantsId,
+      queue: queueValue,
+      isOpen: true,
+    });
   }
+
+  initialRoomsDataSignal.value = copiedValue;
+
+  // const roomDataResponse = await chatRoomGetByParticipantsId(participantsId);
 };
 
-export const removeUserFromCurrentOpendMessagesUserWindows = (userPublicId: string) => {
-  const indexOfOpenedChat = currentOpenedMessagesUserWindows.value.findIndex((userData) => userData.publicId === userPublicId);
+export const closeMessageUserWindow = (initialChatRoomId: string | null) => {
+  const copiedValue = structuredClone(initialRoomsDataSignal.value);
 
-  if (indexOfOpenedChat !== -1) {
-    const copiedValue = [...currentOpenedMessagesUserWindows.value];
+  copiedValue.forEach((data) => {
+    const { id } = data;
 
-    copiedValue.splice(indexOfOpenedChat, 1);
+    if (id === initialChatRoomId) {
+      data.isOpen = false;
+    }
+  });
 
-    setTimeout(() => {
-      currentOpenedMessagesUserWindows.value = copiedValue;
-    }, 250); // Animation time in MessageUserWindow styles
-  }
+  initialRoomsDataSignal.value = copiedValue;
 };
 
 interface componentsProps {
@@ -79,53 +78,19 @@ interface componentsProps {
 }
 
 const MessagesUserWindows = ({ currentUser }: componentsProps) => {
-  const [lastReceivedMessage, setLastReceivedMessage] = useState<{
-    id: string;
-    content: string;
-    toUserId: string | null;
-  }>({
-    id: "",
-    content: "",
-    toUserId: null,
-  });
-
   useSignals();
 
   useEffect(() => {
-    (async () => {
-      await userUpdate(currentUser.id);
-    })();
-
-    const interval = setInterval(async () => {
-      await userUpdate(currentUser.id);
-    }, 1000 * 60 * 2);
-
-    socketSignal.value!.on("receivingMessage", (message) => {
-      setLastReceivedMessage(message);
-      addUserToCurrentOpendMessagesUserWindows(message.toUserId, message.toUserPublicId, new Date(), null);
+    socketSignal.value!.on("messageReceived", ({ message, chatRoomId, fromUserId }: { message: string; chatRoomId: string; fromUserId: string }) => {
+      openNewMessageUserWindow([currentUser.id, fromUserId], chatRoomId);
     });
-
-    return () => {
-      clearInterval(interval);
-    };
   }, []);
-
-  const SortedCurrentOpenedMessagesUserWindows = currentOpenedMessagesUserWindows.value.sort((a, b) => a.queue - b.queue);
 
   return (
     <div className={`${styles.messagesUserWindows}`}>
-      {socketSignal.value &&
-        SortedCurrentOpenedMessagesUserWindows.map((userData) => {
-          const { publicId } = userData;
-
-          return (
-            <MessageUserWindow
-              newMessage={lastReceivedMessage.toUserId === userData.id ? lastReceivedMessage : null}
-              key={publicId}
-              currentUser={currentUser}
-              userData={userData}></MessageUserWindow>
-          );
-        })}
+      {initialRoomsDataSignal.value.map((roomData) => {
+        return <MessageUserWindow key={roomData.id} initialRoomData={roomData} currentUser={currentUser}></MessageUserWindow>;
+      })}
     </div>
   );
 };

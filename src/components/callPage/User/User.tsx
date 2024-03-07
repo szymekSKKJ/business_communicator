@@ -246,6 +246,7 @@ const User = ({ data, currentUserId, streamLocal, roomId, isLocalVideoStreamOn }
 
     return () => {
       clearTimeout(timeout);
+      socketSignal.value!.off("setRemoteDescription");
     };
   }, []);
 

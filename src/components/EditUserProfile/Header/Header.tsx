@@ -4,7 +4,7 @@ import styles from "./styles.module.scss";
 import Image from "next/image";
 import Button from "@/components/UI/Button/Button";
 import Star from "../../../../public/star.svg";
-import { Prompt } from "next/font/google";
+
 import Editable from "@/components/Editable/Editable";
 import { Dispatch, SetStateAction, useRef, useState } from "react";
 import AvatarEditor from "react-avatar-editor";
@@ -13,8 +13,6 @@ import { createNotification } from "@/components/Notifications/Notifications";
 import { setLoaderVisibility } from "@/components/Loader/Loader";
 import { userUpdate } from "@/app/api/user/update/[id]/route";
 import { user } from "@/app/api/user/types";
-
-const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 const isEmpty = (str: string) => !str || /^\s*$/.test(str);
 
@@ -339,10 +337,10 @@ const Header = ({ userData, setBackgroundImage }: componentProps) => {
         <div className={`${styles.wrapper}`}>
           <div className={`${styles.wrapper2}`}>
             <div className={`${styles.opinionRate}`}>
-              <p className={`${prompt.className}`}>Brak</p>
+              <p>Brak</p>
               <Image src={Star} alt="Ikona gwiazdki"></Image>
             </div>
-            <p className={`${prompt.className}`}>0 opinii</p>
+            <p>0 opinii</p>
           </div>
           <div className={`${styles.wrapper1}`}>
             <div className={`${styles.wrapper}`}>
@@ -358,13 +356,13 @@ const Header = ({ userData, setBackgroundImage }: componentProps) => {
         </div>
       </div>
       <nav>
-        <button className={`${prompt.className} ${styles.active}`}>Posty</button>
-        <button className={`${prompt.className}`}>Informacje</button>
-        <button className={`${prompt.className}`}>Zdjęcia</button>
-        <button className={`${prompt.className}`}>Wzmianki</button>
-        <button className={`${prompt.className}`}>Obserwujących</button>
-        <button className={`${prompt.className}`}>Obserwuje</button>
-        <button className={`${prompt.className}`}>Opinie</button>
+        <button className={`${styles.active}`}>Posty</button>
+        <button>Informacje</button>
+        <button>Zdjęcia</button>
+        <button>Wzmianki</button>
+        <button>Obserwujących</button>
+        <button>Obserwuje</button>
+        <button>Opinie</button>
       </nav>
       <div className={`${styles.saveChanges}`}>
         <p>Kliknij w poszczególne sekcje swojego profilu aby je edytować lub prawym przyciskiem myszy aby zobaczyć więcej opcji</p>

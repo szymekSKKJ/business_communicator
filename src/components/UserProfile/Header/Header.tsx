@@ -4,14 +4,11 @@ import styles from "./styles.module.scss";
 import Image from "next/image";
 import Button from "@/components/UI/Button/Button";
 import Star from "../../../../public/star.svg";
-import { Prompt } from "next/font/google";
-import { sessionUser } from "@/app/api/auth/[...nextauth]/route";
+
 import { userGiveFollow } from "@/app/api/user/giveFollow/[userId]/route";
 import { user } from "@/app/api/user/types";
 import { useState } from "react";
-import { addUserToCurrentOpendMessagesUserWindows } from "@/components/WebSocketBackgroundActions/MessagesUserWindows/MessagesUserWindows";
-
-const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
+import { openNewMessageUserWindow } from "@/components/WebSocketBackgroundActions/MessagesUserWindows/MessagesUserWindows";
 
 interface componentProps {
   userData: user;
@@ -34,13 +31,13 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
       </div>
       <div className={`${styles.wrapper}`}>
         <div className={`${styles.userData}`}>
-          <p className={`${styles.username} ${prompt.className}`}>{userData.name}</p>
-          <p className={`${styles.id} ${prompt.className}`}>@{userData.publicId}</p>
-          <p className={`${styles.proffesion} ${prompt.className}`}>{userData.description} </p>
+          <p className={`${styles.username}`}>{userData.name}</p>
+          <p className={`${styles.id}`}>@{userData.publicId}</p>
+          <p className={`${styles.proffesion}`}>{userData.description} </p>
           {currentUser && currentUser.id !== userData.id && (
             <Button
               onClick={() => {
-                addUserToCurrentOpendMessagesUserWindows(userData.id, userData.publicId!, userData.lastActive, userData.profileImage);
+                openNewMessageUserWindow([currentUser.id, userData.id]);
               }}>
               Napisz wiadomość
             </Button>
@@ -49,18 +46,18 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
         <div className={`${styles.wrapper}`}>
           <div className={`${styles.wrapper2}`}>
             <div className={`${styles.opinionRate}`}>
-              <p className={`${prompt.className}`}>{userData.averageOpinion === null ? "brak" : userData.averageOpinion}</p>
+              <p>{userData.averageOpinion === null ? "brak" : userData.averageOpinion}</p>
               <Image src={Star} alt="Ikona gwiazdki"></Image>
             </div>
-            <p className={`${prompt.className}`}>{userData._count.Opinions} opinii</p>
+            <p>{userData._count.Opinions} opinii</p>
           </div>
           <div className={`${styles.wrapper1}`}>
             <div className={`${styles.wrapper}`}>
-              <p className={`${prompt.className}`}>{userData._count.followers}</p>
+              <p>{userData._count.followers}</p>
               <p>Obserwujących</p>
             </div>
             <div className={`${styles.wrapper}`}>
-              <p className={`${prompt.className}`}>{userData._count.following}</p>
+              <p>{userData._count.following}</p>
               <p>Obserwuje</p>
             </div>
           </div>
@@ -83,8 +80,6 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
                 });
 
                 const response = await userGiveFollow(currentUser.id, userData.id, userData.doesCurrentUserFollowThisUser!);
-
-                console.log(response);
               }}>
               {userData.doesCurrentUserFollowThisUser ? (
                 <>
@@ -98,13 +93,13 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
         </div>
       </div>
       <nav>
-        <button className={`${prompt.className} ${styles.active}`}>Posty</button>
-        <button className={`${prompt.className}`}>Informacje</button>
-        <button className={`${prompt.className}`}>Zdjęcia</button>
-        <button className={`${prompt.className}`}>Wzmianki</button>
-        <button className={`${prompt.className}`}>Obserwujących</button>
-        <button className={`${prompt.className}`}>Obserwuje</button>
-        <button className={`${prompt.className}`}>Opinie</button>
+        <button className={`${styles.active} normalText`}>Posty</button>
+        <button className={`normalText`}>Informacje</button>
+        <button className={`normalText`}>Zdjęcia</button>
+        <button className={`normalText`}>Wzmianki</button>
+        <button className={`normalText`}>Obserwujących</button>
+        <button className={`normalText`}>Obserwuje</button>
+        <button className={`normalText`}>Opinie</button>
       </nav>
     </header>
   );

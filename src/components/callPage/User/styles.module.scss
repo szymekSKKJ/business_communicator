@@ -6,7 +6,7 @@
   height: auto;
   min-height: 200px;
   max-height: 100%;
-  aspect-ratio: 2/1.125;
+  aspect-ratio: 16/9;
   background-color: #434d56;
   border-radius: 8px;
   border: solid 4px #4d5a66;
@@ -125,11 +125,11 @@
     left: unset;
     right: 10px;
     transform: translate(0%, 0%);
-    max-height: 50px;
+    max-height: 42px;
     gap: 5px;
 
     p {
-      font-size: 18px;
+      font-size: 15px;
     }
   }
 }

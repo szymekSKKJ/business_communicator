@@ -6,7 +6,6 @@ import shareIcon from "../../../public/post/share.svg";
 import Image from "next/image";
 import moment from "moment";
 import "moment/locale/pl";
-import { Montserrat, Prompt } from "next/font/google";
 import Comment, { SkeletonLoadingComment } from "./Comment/Comment";
 import { useLayoutEffect, useState } from "react";
 import { postLike } from "@/app/api/post/like/[postId]/route";
@@ -17,9 +16,6 @@ import Link from "next/link";
 import SendComment from "./SendComment/SendComment";
 import { post } from "@/app/api/post/types";
 import { user } from "@/app/api/user/types";
-
-const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
-const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps {
   postData: post;
@@ -70,8 +66,8 @@ const Post = ({ postData, currentUser }: componentProps) => {
           </p>
         </div>
       </div>
-      <div className={`${styles.content} ${prompt.className}`}>
-        <p>{postData.content}</p>
+      <div className={`${styles.content}`}>
+        <p className="normalText">{postData.content}</p>
         {postData.imagesData.length !== 0 && (
           <div className={`${styles.images}`}>
             {postData.imagesData
@@ -92,18 +88,17 @@ const Post = ({ postData, currentUser }: componentProps) => {
               })}
           </div>
         )}
-
         <div className={`${styles.options}`}>
           <LikeButton
+            className="normalText"
             currentLikes={postData._count.likedBy}
             doesCurrentUserLikesThat={postData.doesCurrentUserLikesThisPost}
             onClickCallback={async (likesData) => {
               const { value } = likesData;
               currentUser && (await postLike(postData.id, value));
             }}></LikeButton>
-
           <button
-            className={`${montserrat.className}`}
+            className="normalText"
             onClick={async () => {
               setAreCommentsOpen((currentValue) => (currentValue === false ? true : false));
               if (comments.length === 0) {
@@ -112,7 +107,7 @@ const Post = ({ postData, currentUser }: componentProps) => {
             }}>
             <Image src={commentIcon} alt="Ikona"></Image>Skomentuj <span> {comments.length === 0 ? postData._count.comments : comments.length}</span>
           </button>
-          <button className={`${montserrat.className}`}>
+          <button className="normalText">
             <Image src={shareIcon} alt="Ikona"></Image>Udostępnij <span>{postData._count.sharedBy}</span>
           </button>
         </div>

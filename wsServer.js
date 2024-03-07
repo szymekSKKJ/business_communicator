@@ -68,15 +68,28 @@ var activeUsers = new Map();
 var callingClients = new Map();
 var callRooms = new Map();
 var logicForMessages = function (socket) {
-    socket.on("sendingMessage", function (message) {
-        var toUserId = message.toUserId, content = message.content, fromUserId = message.fromUserId, messageId = message.messageId, fromUserPublicId = message.fromUserPublicId;
+    socket.on("sendMessage", function (_a) {
+        var message = _a.message, fromUserId = _a.fromUserId, toUserId = _a.toUserId, chatRoomId = _a.chatRoomId, messageId = _a.messageId;
+        var foundClient = activeUsers.get(toUserId);
+        if (foundClient) {
+            foundClient.conectedInstance.forEach(function (ioId) {
+                io.to(ioId).emit("messageReceived", {
+                    fromUserId: fromUserId,
+                    message: message,
+                    chatRoomId: chatRoomId,
+                    messageId: messageId,
+                });
+            });
+        }
+    });
+    socket.on("messageRead", function (_a) {
+        var fromUserId = _a.fromUserId, chatRoomId = _a.chatRoomId, messageId = _a.messageId, toUserId = _a.toUserId;
         var foundClient = activeUsers.get(toUserId);
         foundClient === null || foundClient === void 0 ? void 0 : foundClient.conectedInstance.forEach(function (ioId) {
-            io.to(ioId).emit("receivingMessage", {
-                toUserPublicId: fromUserPublicId,
-                id: messageId,
-                toUserId: fromUserId,
-                content: content,
+            io.to(ioId).emit("messageRead", {
+                fromUserId: fromUserId,
+                messageId: messageId,
+                chatRoomId: chatRoomId,
             });
         });
     });
@@ -336,11 +349,24 @@ var initializeCall = function (socket) {
         }
     });
 };
+var createNotification = function (socket) {
+    socket.on("mainNavigationNotificationMessage", function (_a) {
+        var toUserId = _a.toUserId, fromUserId = _a.fromUserId, chatRoomId = _a.chatRoomId;
+        var activeUser = activeUsers.get(toUserId);
+        activeUser.conectedInstance.forEach(function (ioId) {
+            io.to(ioId).emit("mainNavigationNotificationMessage", {
+                fromUserId: fromUserId,
+                chatRoomId: chatRoomId,
+            });
+        });
+    });
+};
 require("events").EventEmitter.defaultMaxListeners = 100;
 io.on("connection", function (socket) {
     addToActive(socket);
     logicForMessages(socket);
     initializeCall(socket);
     logicForCalling(socket);
+    createNotification(socket);
 });
 httpServer.listen(3001);

@@ -4,7 +4,7 @@ import styles from "./styles.module.scss";
 import commentIcon from "../../../../public/post/comment.svg";
 import Image from "next/image";
 import moment from "moment";
-import { Montserrat } from "next/font/google";
+
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { commentLike } from "@/app/api/comment/like/[commentId]/route";
 import { comment } from "@/app/api/comment/getSome/[postId]/route";
@@ -15,12 +15,7 @@ import { subCommentGetSome } from "@/app/api/subComment/getSome/[commentId]/rout
 import SubComment from "./SubComment/SubComment";
 import SendComment from "../SendComment/SendComment";
 import { subComment } from "@/app/api/subComment/types";
-import { Prompt } from "next/font/google";
 import { user } from "@/app/api/user/types";
-
-const prompt = Prompt({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
-
-const montserrat = Montserrat({ weight: ["300", "400", "500", "600", "700", "800", "900"], subsets: ["latin"] });
 
 interface componentProps {
   data: comment;
@@ -70,18 +65,19 @@ const Comment = ({ data, currentUser, setAreCommentsOpen, areCommentsOpen }: com
         </div>
         <div className={`${styles.wrapper2}`}>
           <Link href={`/${data.author.publicId}`}>
-            <p className={`${montserrat.className}`}>{data.author.publicId}</p>
+            <p>{data.author.publicId}</p>
           </Link>
-          <p className={`${montserrat.className}`}>
+          <p>
             {formatedDate.fromNow()} o {date.toLocaleTimeString("pl-PL", { hour: "numeric", minute: "numeric" })}
           </p>
         </div>
       </div>
       <div className={`${styles.content}`}>
-        <p className={`${prompt.className}`}>{data.content}</p>
+        <p className="normalText">{data.content}</p>
       </div>
       <div className={`${styles.options}`}>
         <LikeButton
+          className="normalText"
           onClickCallback={async (likesData) => {
             const { value } = likesData;
             await commentLike(data.id, value);
@@ -89,7 +85,7 @@ const Comment = ({ data, currentUser, setAreCommentsOpen, areCommentsOpen }: com
           currentLikes={data._count.likedBy}
           doesCurrentUserLikesThat={data.doesCurrentUserLikesThisComment}></LikeButton>
         <button
-          className={`${montserrat.className}`}
+          className="normalText"
           onClick={() => {
             setAreCommentsOpen(true);
             setAreSubCommentsOpen((currentValue) => (currentValue === false ? true : false));
