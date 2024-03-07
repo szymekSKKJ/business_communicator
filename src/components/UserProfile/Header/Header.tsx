@@ -46,10 +46,12 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
         <div className={`${styles.wrapper}`}>
           <div className={`${styles.wrapper2}`}>
             <div className={`${styles.opinionRate}`}>
-              <p>{userData.averageOpinion === null ? "brak" : userData.averageOpinion}</p>
+              <p>{userData.averageOpinion === null ? "Brak" : userData.averageOpinion}</p>
               <Image src={Star} alt="Ikona gwiazdki"></Image>
             </div>
-            <p>{userData._count.Opinions} opinii</p>
+            <p>
+              {userData._count.Opinions} {userData._count.Opinions === undefined ? "0" : ""} opinii
+            </p>
           </div>
           <div className={`${styles.wrapper1}`}>
             <div className={`${styles.wrapper}`}>
@@ -94,6 +96,7 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
       </div>
       <nav>
         <button className={`${styles.active} normalText`}>Posty</button>
+        <button className={`normalText`}>Oferta</button>
         <button className={`normalText`}>Informacje</button>
         <button className={`normalText`}>Zdjęcia</button>
         <button className={`normalText`}>Wzmianki</button>

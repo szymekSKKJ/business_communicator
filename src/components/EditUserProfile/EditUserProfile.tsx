@@ -16,9 +16,7 @@ const EditUserProfile = ({ userData }: componentProps) => {
   return (
     <div className={`${styles.editUserProfile}`}>
       <Background backgroundImage={backgroundImage}></Background>
-      <div className={`${styles.content}`}>
-        <Header setBackgroundImage={setBackgroundImage} userData={userData}></Header>
-      </div>
+      <Header setBackgroundImage={setBackgroundImage} userData={userData}></Header>
     </div>
   );
 };

@@ -356,13 +356,14 @@ const Header = ({ userData, setBackgroundImage }: componentProps) => {
         </div>
       </div>
       <nav>
-        <button className={`${styles.active}`}>Posty</button>
-        <button>Informacje</button>
-        <button>Zdjęcia</button>
-        <button>Wzmianki</button>
-        <button>Obserwujących</button>
-        <button>Obserwuje</button>
-        <button>Opinie</button>
+        <button className={`${styles.active} normalText`}>Posty</button>
+        <button className={`normalText`}>Oferta</button>
+        <button className={`normalText`}>Informacje</button>
+        <button className={`normalText`}>Zdjęcia</button>
+        <button className={`normalText`}>Wzmianki</button>
+        <button className={`normalText`}>Obserwujących</button>
+        <button className={`normalText`}>Obserwuje</button>
+        <button className={`normalText`}>Opinie</button>
       </nav>
       <div className={`${styles.saveChanges}`}>
         <p>Kliknij w poszczególne sekcje swojego profilu aby je edytować lub prawym przyciskiem myszy aby zobaczyć więcej opcji</p>
