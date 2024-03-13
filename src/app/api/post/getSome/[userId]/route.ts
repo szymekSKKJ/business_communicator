@@ -110,7 +110,7 @@ export const GET = async (request: Request, { params: { userId } }: { params: { 
         const postDataNewType = postData as post;
 
         if (mostLikedComment) {
-          const urlImage = await getDownloadURL(ref(storage, `users/${userId}/profileImage.webp`));
+          const urlImage = await getDownloadURL(ref(storage, `users/${mostLikedComment.author.id}/profileImage.webp`));
 
           mostLikedComment.author.profileImage = urlImage;
 
