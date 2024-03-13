@@ -1,0 +1,38 @@
+.clientButtonsWrapperForChangingOffestOfUsers {
+  width: calc(100% + 50px);
+  height: auto;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+  top: 50%;
+  transform: translate(-25px, -50%);
+
+  button {
+    width: 50px;
+    height: 50px;
+    background-color: #4988ce;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: 250ms;
+    position: absolute;
+    border: none;
+    border-radius: 100%;
+
+    &:last-child {
+      right: 0px;
+    }
+
+    &:hover {
+      filter: brightness(1.1);
+    }
+
+    i {
+      font-size: 42px;
+      color: white;
+    }
+  }
+}

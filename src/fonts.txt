@@ -1,2 +1,3 @@
 
-Prompt
+noto_Sans
+varela_Round

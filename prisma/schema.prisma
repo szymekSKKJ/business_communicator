@@ -69,6 +69,7 @@ model User {
     lastActive               DateTime              @default(now())
     sentMessage              SentMessage[]         @relation("sender")
     chatRoomParticipant      ChatRoomParticipant[]
+    joinedAt                 DateTime              @default(now())
 }
 
 // Next auth end

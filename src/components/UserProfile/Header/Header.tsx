@@ -33,7 +33,7 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
         <div className={`${styles.userData}`}>
           <p className={`${styles.username}`}>{userData.name}</p>
           <p className={`${styles.id}`}>@{userData.publicId}</p>
-          <p className={`${styles.proffesion}`}>{userData.description} </p>
+          <p className={`${styles.proffesion} normalText`}>{userData.description} </p>
           {currentUser && currentUser.id !== userData.id && (
             <Button
               onClick={() => {
@@ -50,7 +50,7 @@ const Header = ({ userData: userDataInit, currentUser }: componentProps) => {
               <Image src={Star} alt="Ikona gwiazdki"></Image>
             </div>
             <p>
-              {userData._count.Opinions} {userData._count.Opinions === undefined ? "0" : ""} opinii
+              z {userData._count.opinions} {userData._count.opinions === undefined ? "0" : ""} opinii
             </p>
           </div>
           <div className={`${styles.wrapper1}`}>

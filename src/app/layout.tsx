@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./global.scss";
 
 import Notifications from "@/components/Notifications/Notifications";
-import { Nunito, Mitr, Varela_Round } from "next/font/google";
+import { Varela_Round } from "next/font/google";
 import Loader from "@/components/Loader/Loader";
 import { userGetByPublicId } from "./api/user/getByPublicId/[publicId]/route";
 import { authOptions, sessionUser } from "./api/auth/[...nextauth]/route";

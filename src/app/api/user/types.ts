@@ -12,7 +12,7 @@ export type user = {
   _count: {
     following: number;
     followers: number;
-    Opinions: number;
+    opinions: number;
   };
 };
 
@@ -21,4 +21,5 @@ export type userSmallData = {
   publicId: string;
   profileImage: string;
   lastActive: Date;
+  description: string;
 };

@@ -1,0 +1,82 @@
+.select {
+  width: auto;
+  height: auto;
+  position: relative;
+  background-color: white;
+  cursor: pointer;
+  z-index: 100000;
+
+  .currentValue {
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    position: relative;
+    text-overflow: ellipsis;
+    border: solid 2px #d0dae1;
+
+    p {
+      line-height: 1;
+      padding-left: 10px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      width: calc(100% - (20px + 20px)); // Minus 20px width of icon and padding
+      height: 1.2em;
+      white-space: nowrap;
+    }
+
+    i {
+      font-size: 20px;
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translate(0%, -50%);
+      z-index: 1000;
+      color: #4988ce;
+      transition: 250ms;
+    }
+  }
+
+  .dropDown {
+    width: 100%;
+    background-color: white;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 0px;
+    display: none;
+
+    .option {
+      width: 100%;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      text-wrap: pretty;
+      word-break: break-all;
+
+      &:hover {
+        background-color: #e6e6e6;
+      }
+    }
+
+    .option.disabled {
+      background-color: #d9d9d9;
+      cursor: not-allowed;
+      color: #595959;
+    }
+  }
+}
+
+.select.open {
+  .currentValue {
+    i {
+      transform: translate(0%, -50%) rotateX(180deg);
+    }
+  }
+
+  .dropDown {
+    display: flex;
+  }
+}

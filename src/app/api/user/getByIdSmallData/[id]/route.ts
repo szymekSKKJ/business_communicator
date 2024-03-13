@@ -16,6 +16,7 @@ export const GET = async (request: Request, { params: { id } }: { params: { id: 
         id: true,
         publicId: true,
         lastActive: true,
+        description: true,
       },
     })) as userSmallData | null;
 

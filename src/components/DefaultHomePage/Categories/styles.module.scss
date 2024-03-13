@@ -1,0 +1,41 @@
+.categories {
+  h2 {
+    color: #4988ce;
+    text-align: center;
+    font-size: 54px;
+    margin-bottom: 25px;
+    font-weight: 700;
+  }
+
+  .selectElementsWrapper {
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .categoriesWrapper {
+    --items-to-display: 8;
+    --gap: 10px;
+
+    width: auto;
+    height: auto;
+    display: flex;
+    gap: var(--gap);
+    flex-wrap: wrap;
+    margin: 0px auto 0px auto;
+
+    &::after {
+      content: "";
+      flex: auto;
+    }
+  }
+
+  button {
+    margin: 25px auto 0px auto;
+    font-size: 20px !important;
+  }
+}

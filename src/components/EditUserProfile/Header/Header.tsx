@@ -326,7 +326,7 @@ const Header = ({ userData, setBackgroundImage }: componentProps) => {
             defaultValue="Opisz czym się zajmujesz"
             noPadding>
             <p
-              className={`${styles.proffesion}`}
+              className={`${styles.proffesion} normalText`}
               ref={(node) => {
                 descriptionElementRef.current = node;
               }}
