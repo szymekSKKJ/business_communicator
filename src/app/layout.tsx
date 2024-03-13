@@ -28,6 +28,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <head>
         <script src="https://kit.fontawesome.com/845eb6a366.js" crossOrigin="anonymous" async></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Varela+Round&display=swap" rel="stylesheet" />
       </head>
       <body className={`${varela_Round.className}`}>
         {userData?.data && <MainNavigation currentUser={userData.data}></MainNavigation>}
